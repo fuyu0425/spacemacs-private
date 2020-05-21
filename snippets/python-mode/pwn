@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: pwn
+# key: pwn
+# --
+
+#!/usr/bin/env python3
+import os
+import sys
+from pwn import *
+
+
+elf_name = '${1:elf name}'
+
+elf = ELF(elf_name)
+
+context.update(arch=elf.arch, os=elf.os)
+
+host = ""
+port = 0
+
+if len(sys.argv) > 1:
+  r = remote(host, port)
+else:
+  r = process(elf_name, env={'LD_PRELOAD': ''} )
+
+r.interactive()

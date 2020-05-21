@@ -1,0 +1,6 @@
+[submodule "layers/languagetool"]
+	path = layers/languagetool
+	url = https://github.com/jsmestad/spacemacs-langtool
+[submodule "layers/leetcode-emacs-layer"]
+	path = layers/leetcode-emacs-layer
+	url = https://github.com/anmoljagetia/leetcode-emacs-layer.git
