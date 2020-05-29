@@ -3,6 +3,7 @@
 
 (defconst leo-org-packages
   '(
+    org
     org-agenda
     org-super-agenda
     org-journal
@@ -69,7 +70,6 @@
   (setq org-clock-out-remove-zero-time-clocks t)
   )
 
-
 (defun leo-org/post-init-org-agenda ()
   (setq org-agenda-files '(
                            "~/org/gtd/inbox.org"
@@ -88,13 +88,13 @@
                 (push file org-agenda-files)))
             (org-projectile-todo-files)))
 
-   (setq org-refile-targets '((org-agenda-files :maxlevel . 3)
-                              ("~/org/gtd/someday.org" :maxlevel . 3)
-                              ("~/org/gtd/finished.org" :maxlevel . 3)
-                              )
-         org-outline-path-complete-in-steps nil
-         org-refile-allow-creating-parent-nodes 'confirm
-         org-refile-use-outline-path 'file)
+  (setq org-refile-targets '((org-agenda-files :maxlevel . 3)
+                             ("~/org/gtd/someday.org" :maxlevel . 3)
+                             ("~/org/gtd/finished.org" :maxlevel . 3)
+                             )
+        org-outline-path-complete-in-steps nil
+        org-refile-allow-creating-parent-nodes 'confirm
+        org-refile-use-outline-path 'file)
   )
 
 (defun leo-org/init-doct ()

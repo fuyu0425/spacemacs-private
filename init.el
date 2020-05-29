@@ -453,6 +453,7 @@ It should only modify the values of Spacemacs settings."
                                prog-mode
                                text-mode
                                treemacs-mode
+                               :visual t
                                :relative t)
 
    ;; Code folding method. Possible values are `evil' and `origami'.
@@ -604,16 +605,18 @@ dump."
   )
 
 (defun leo/configure-evil ()
+  (when (not (display-graphic-p))
+    (setq evil-toggle-key "C-`"))
   (setq-default
    evil-want-Y-yank-to-eol nil
    evil-ex-visual-char-range t
    evil-escape-key-sequence "jk"
    evil-escape-unordered-key-sequence "true"
    evil-escape-delay 0.2)
-  (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop)
-  )
+  (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop))
 
-
+(defun leo/configure-persp ()
+  (setq persp-autokill-buffer-on-remove 'kill-weak))
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -628,11 +631,9 @@ before packages are loaded."
   (setq tags-add-tables nil)
   (setq inhibit-compacting-font-caches t)
   (setq system-time-locale "C")
-  ;; (with-eval-after-load 'org
-  ;;   (leo/configure-org-mode)
-  ;;   )
   (leo/configure-git)
   (leo/configure-evil)
+  (leo/configure-persp)
   ;; turn of symlinks ask
   (setq vc-follow-symlinks t)
 
