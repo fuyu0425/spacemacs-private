@@ -1,6 +1,7 @@
 (configuration-layer/declare-layers
  '(
    leo-blog
+   leo-calibre
    leo-lang-tools
    myleetcode
    (plantuml :variables

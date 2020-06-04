@@ -1,0 +1,5 @@
+(setq sql-sqlite-program "/usr/bin/sqlite3")
+(setq calibredb-root-dir "~/GoogleDrive/calibre")
+(setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
+(setq calibredb-program "/Applications/calibre.app/Contents/MacOS/calibredb")
+(setq calibredb-library-alist '(("~/GoogleDrive/calibre")))
