@@ -7,9 +7,9 @@
 )
 
 (defun leo-calibre/init-calibredb ()
-  `(use-package calibredb
-    :commands (calibredb calibredb-list ,(when (package-installed-p 'helm) 'calibredb-helm))
-    )
+  (eval `(use-package calibredb
+    :commands (calibredb calibredb-list ,(when (package-installed-p 'helm) 'calibredb-find-helm))
+    ))
   )
 
 ;;; packages.el ends here
