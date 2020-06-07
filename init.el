@@ -139,7 +139,8 @@ This function should only modify configuration layer settings."
                                       z3-mode
                                       ;; org-noter
                                       exec-path-from-shell
-                                      ;; ssh-agency
+                                      ssh-agency
+                                      magit-delta
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -155,7 +156,7 @@ This function should only modify configuration layer settings."
    ;; installs only the used packages but won't delete unused ones. `all'
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-but-keep-unused))
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -587,6 +588,7 @@ dump."
 
 (defun leo/configure-git ()
   (magit-todos-mode)
+  (magit-delta-mode)
   (setq
    magit-blame-styles '((margin
                          (margin-format " %s%f" " %C %a" " %H")
