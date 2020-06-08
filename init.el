@@ -728,6 +728,8 @@ before packages are loaded."
 
   (setq leetcode-prefer-language "cpp")
   (setq leetcode-prefer-sql "mysql")
+  (setq python-shell-completion-native-enable nil)
+  (setq kill-buffer-query-functions nil)
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

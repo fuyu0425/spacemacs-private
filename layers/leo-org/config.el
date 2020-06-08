@@ -11,3 +11,5 @@
                                      "tell application \"org-clock-statusbar\" to clock out"))))
 (add-hook 'org-mode-hook (lambda ()
                            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+(setq org-confirm-babel-evaluate nil)
+(setq org-babel-python-command "python -ic ''")
