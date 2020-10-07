@@ -13,3 +13,7 @@
                            (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
 (setq org-confirm-babel-evaluate nil)
 (setq org-babel-python-command "python -ic ''")
+(setq org-download-image-org-width 650)
+(setq org-download-annotate-function (lambda (_link) ""))
+; (require 'ox-extra)
+; (ox-extras-activate '(ignore-headlines))

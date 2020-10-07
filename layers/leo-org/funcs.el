@@ -4,11 +4,15 @@
          (image-file (concat
                       (org-download--dir)
                       "/"
-                      (format-time-string "%Y%m%d_%H%M%S_.png")))
-         (exit-status
-          (call-process "pngpaste" nil nil nil
-                        image-file)))
-    (org-insert-link nil (concat "file:" image-file) "")
+                      (format-time-string "%Y%m%d_%H%M%S_.png"))))
+         (org-download-clipboard)
+    ;;      (exit-status
+    ;;       (call-process "pngpaste" nil nil nil
+    ;;                     image-file)))
+    ;; (insert (if (= org-download-image-org-width 0)
+    ;;             ""
+    ;;           (format "#+attr_org: :width %dpx\n" org-download-image-org-width)))
+    ;; (org-insert-link nil (concat "file:" image-file) "")
     (org-display-inline-images)))
 
 (defun org-journal-find-location ()

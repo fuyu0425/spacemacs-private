@@ -63,21 +63,30 @@ This function should only modify configuration layer settings."
      (colors :variables
              colors-enable-nyan-cat-progress-bar t)
      dash
+     (evil-snipe :variables evil-snipe-enable-alternate-f-and-t-behaviors t)
      search-engine
      pdf
      (latex :variables
             latex-enable-magic t
             latex-enable-folding t)
      bibtex
-     ranger
+     (ranger :variables
+             ranger-cleanup-on-disable t
+             ranger-cleanup-eagerly t
+             ranger-show-hidden t)
      ;; languages
      asm
      (lsp :variables
-          lsp-ui-doc-enable nil)
+          lsp-signature-auto-activate nil
+          lsp-ui-doc-enable nil
+          lsp-ui-imenu-enable nil
+          lsp-eldoc-enable-hover nil)
      dap
+     go
      json
      haskell
      java
+     javascript
      ;; scala
      ocaml
      (c-c++ :variables
@@ -90,13 +99,15 @@ This function should only modify configuration layer settings."
      rust
      (python :variables
              python-backend 'lsp
-             python-lsp-server 'pyls)
+             python-lsp-server 'mspyls
+             )
      (yaml :variables yaml-enable-lsp t)
      fsharp
      lua
      vimscript
      ruby
      ;; tools
+     pandoc
      helpful
      (cmake
       ;; :variables cmake-enable-cmake-ide-support t
@@ -113,7 +124,8 @@ This function should only modify configuration layer settings."
             shell-default-shell 'vterm
             shell-default-height 50
             shell-default-position 'bottom)
-     treemacs
+     (treemacs :variables
+               treemacs-use-scope-type 'Perspectives)
      version-control
      copy-as-format
      vagrant
@@ -140,7 +152,10 @@ This function should only modify configuration layer settings."
                                       ;; org-noter
                                       exec-path-from-shell
                                       ssh-agency
+                                      keychain-environment
                                       magit-delta
+                                      paren-face
+                                      visual-fill-column
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -363,7 +378,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil, the paste transient-state is enabled. While enabled, after you
    ;; paste something, pressing `C-j' and `C-k' several times cycles through the
    ;; elements in the `kill-ring'. (default nil)
-   dotspacemacs-enable-paste-transient-state nil
+   dotspacemacs-enable-paste-transient-state t
 
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
@@ -454,6 +469,7 @@ It should only modify the values of Spacemacs settings."
                                prog-mode
                                text-mode
                                treemacs-mode
+                               isar-mode
                                :visual t
                                :relative t)
 
@@ -589,7 +605,7 @@ dump."
 
 (defun leo/configure-git ()
   (magit-todos-mode)
-  (magit-delta-mode)
+  ;; (magit-delta-mode)
   (setq
    magit-blame-styles '((margin
                          (margin-format " %s%f" " %C %a" " %H")
@@ -605,6 +621,7 @@ dump."
                          (show-message . t)))
    magit-diff-use-overlays nil
    magit-save-repository-buffers 'dontask)
+  (magit-autofetch-mode)
   )
 
 (defun leo/configure-evil ()
@@ -619,17 +636,27 @@ dump."
   (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop))
 
 (defun leo/configure-persp ()
+  (setq layouts-enable-autosave t
+        layouts-autosave-delay 600)
   (setq persp-autokill-buffer-on-remove 'kill-weak))
 
+(defun my/org-ref-notes-function (candidates)
+  (let ((key (helm-marked-candidates)))
+    (funcall org-ref-notes-function (car key))))
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
 This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (exec-path-from-shell-initialize)
+  ;; (setq exec-path-from-shell-arguments '("-i"))
+  ;; (setq shell-file-name "/opt/local/bin/zsh")
+  ;; (exec-path-from-shell-initialize)
+  ;; (exec-path-from-shell-copy-env "SSH_AGENT_PID")
+  ;; (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
   (my-reset-frame-size)
   (add-hook 'after-make-frame-functions 'my-reset-frame-size t)
+  (defvaralias 'helm-c-yas-space-match-any-greedy 'helm-yas-space-match-any-greedy "Temporary alias for Emacs27")
   (setq auto-save-interval 60)
   (setq tags-add-tables nil)
   (setq inhibit-compacting-font-caches t)
@@ -641,6 +668,9 @@ before packages are loaded."
   (setq vc-follow-symlinks t)
 
   ;; (setq garbage-collection-messages t)
+  (setq-default fill-column 100)
+  (add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+  (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
   (spacemacs/toggle-highlight-long-lines-globally-off)
   (spacemacs/toggle-indent-guide-globally-on)
   (spacemacs-modeline/init-spaceline)
@@ -649,7 +679,7 @@ before packages are loaded."
     (spacemacs/toggle-display-time-on))
 
   (setq spacemacs-jump-handlers-coq-mode nil)
-  (setq shell-file-name "/bin/bash")
+  ;; (setq shell-file-name "/bin/bash")
   (setq projectile-enable-caching t)
   (global-set-key (kbd "<home>") 'beginning-of-line)
   (global-set-key (kbd "<end>") 'end-of-line)
@@ -697,7 +727,6 @@ before packages are loaded."
               ))
   (setq pdf-sync-backward-display-action t)
   (setq pdf-sync-forward-display-action t)
-  (setq ranger-cleanup-eagerly t)
   (add-hook 'LaTeX-mode-hook #'flyspell-mode)
   (setq google-translate-default-target-language "zh-TW")
   ;; (add-hook 'focus-out-hook (lambda ()
@@ -730,6 +759,28 @@ before packages are loaded."
   (setq leetcode-prefer-sql "mysql")
   (setq python-shell-completion-native-enable nil)
   (setq kill-buffer-query-functions nil)
+  (add-to-list 'load-path "~/source/emacs-mode/simp-isar-mode")
+  (require 'isar-mode)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+  (use-package visual-fill-column
+    :config
+    (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
+    (setq-default split-window-preferred-function 'visual-fill-column-split-window-sensibly)
+    (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
+  (setq reftex-default-bibliography '("~/bibtex/library.bib"))
+  (setq org-ref-default-bibliography '("~/bibtex/library.bib")
+        org-ref-notes-function 'org-ref-notes-function-many-files)
+  (setq bibtex-completion-bibliography '("~/bibtex/library.bib")
+        bibtex-completion-notes-path "~/org/paper_notes")
+  (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+  ;; ;; Note that 7 is a magic number of the index where you want to insert the command. You may need to change yours.
+  (helm-add-action-to-source "Edit notes" 'my/org-ref-notes-function helm-source-bibtex 7)
+  (setq bibtex-completion-notes-template-multiple-files
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}"))
+  (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
+  (setq bibtex-completion-pdf-open-function
+        (lambda (fpath)
+          (start-process "open" "*open*" "open" fpath)))
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

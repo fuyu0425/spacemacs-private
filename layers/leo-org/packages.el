@@ -8,6 +8,7 @@
     org-super-agenda
     org-journal
     doct
+    (ox-extra :location built-in)
     )
   )
 
@@ -200,6 +201,12 @@
         org-icalendar-include-todo "all"
         org-icalendar-combined-agenda-file "~/org/org-calendar.ics")
   )
+
+(defun leo-org/init-ox-extra ()
+  (use-package ox-extra :after ox
+    :config
+    (ox-extras-activate '(ignore-headlines))
+    ))
 
 
 ;;; packages.el ends here

@@ -14,13 +14,25 @@ elf_name = '${1:elf name}'
 elf = ELF(elf_name)
 
 context.update(arch=elf.arch, os=elf.os)
+context.terminal = ["tmux", "splitw", "-h"]
 
 host = ""
 port = 0
 
-if len(sys.argv) > 1:
+is_remote = len(sys.argv) > 1
+
+libc_base_local = 0
+libc_base_remote = 0
+
+libc_base = libc_base_remote if is_remote else libc_base_local
+
+
+argv=[elf_name]
+env={}
+
+if is_remote:
   r = remote(host, port)
 else:
-  r = process(elf_name, env={'LD_PRELOAD': ''} )
+  r = process(argv=argv,env=env)
 
 r.interactive()
