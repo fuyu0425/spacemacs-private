@@ -1,0 +1,22 @@
+--- ./bibtex-completion.el.bak	2020-10-18 05:48:39.949660011 -0400
++++ ./bibtex-completion.el	2020-10-18 05:50:10.155895188 -0400
+@@ -1401,12 +1401,13 @@
+                                         ; One notes file per publication:
+           (let* ((path (f-join bibtex-completion-notes-path
+                                (s-concat key bibtex-completion-notes-extension))))
+-            (find-file path)
+-            (unless (f-exists? path)
+-              ;; First expand BibTeX variables, then org-capture template vars:
+-              (insert (bibtex-completion-fill-template
+-                       entry
+-                       bibtex-completion-notes-template-multiple-files))))
++            (if (f-exists? path)
++                ;; First expand BibTeX variables, then org-capture template vars:
++                (find-file path)
++                (find-file path)
++                (insert (bibtex-completion-fill-template
++                        entry
++                        bibtex-completion-notes-template-multiple-files))))
+                                         ; One file for all notes:
+         (unless (and buffer-file-name
+                      (f-same? bibtex-completion-notes-path buffer-file-name))

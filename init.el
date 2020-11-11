@@ -65,7 +65,8 @@ This function should only modify configuration layer settings."
      dash
      (evil-snipe :variables evil-snipe-enable-alternate-f-and-t-behaviors t)
      search-engine
-     pdf
+     ;; pdf
+     leo-pdf
      (latex :variables
             latex-enable-magic t
             latex-enable-folding t)
@@ -79,9 +80,10 @@ This function should only modify configuration layer settings."
      (lsp :variables
           lsp-signature-auto-activate nil
           lsp-ui-doc-enable nil
-          lsp-ui-imenu-enable nil
+          ;; lsp-ui-imenu-enable nil
           lsp-eldoc-enable-hover nil)
      dap
+     php
      go
      json
      haskell
@@ -134,7 +136,7 @@ This function should only modify configuration layer settings."
      leo-common
      ,(cond ((eq system-type 'darwin) 'leo-mac)
             ((eq system-type 'gnu/linux) 'leo-linux))
-     cryptoline
+     ;; cryptoline
      )
 
    ;; List of additional packages that will be installed without being
@@ -156,6 +158,8 @@ This function should only modify configuration layer settings."
                                       magit-delta
                                       paren-face
                                       visual-fill-column
+                                      jetbrains-darcula-theme
+                                      xenops
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -294,7 +298,8 @@ It should only modify the values of Spacemacs settings."
                          dracula
                          solarized-dark
                          spacemacs-dark
-                         spacemacs-light)
+                         spacemacs-light
+                         jetbrains-darcula)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -378,7 +383,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil, the paste transient-state is enabled. While enabled, after you
    ;; paste something, pressing `C-j' and `C-k' several times cycles through the
    ;; elements in the `kill-ring'. (default nil)
-   dotspacemacs-enable-paste-transient-state t
+   dotspacemacs-enable-paste-transient-state nil
 
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
@@ -465,7 +470,7 @@ It should only modify the values of Spacemacs settings."
    ;; When used in a plist, `visual' takes precedence over `relative'.
    ;; (default nil)
    dotspacemacs-line-numbers '(:enabled-for-modes
-                               coq-mode
+                               ;; coq-mode
                                prog-mode
                                text-mode
                                treemacs-mode
@@ -564,6 +569,9 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+  (setq monokai-highlight      "#535246"
+        monokai-highlight-line "#353630")
+
   (setq evil-want-abbrev-expand-on-insert-exit nil)
   (setq-default git-magit-status-fullscreen t)
   (setq winum-scope 'frame-local)
@@ -619,6 +627,16 @@ dump."
                         (lines
                          (show-lines . t)
                          (show-message . t)))
+   magit-repolist-columns '(("Name" 25 magit-repolist-column-ident nil)
+                           ("Branch" 25 magit-repolist-column-branch nil)
+                           ("Version" 25 magit-repolist-column-version nil)
+                           ("B<U" 3 magit-repolist-column-unpulled-from-upstream
+                            ((:right-align t)
+                             (:help-echo "Upstream changes not in branch")))
+                           ("B>U" 3 magit-repolist-column-unpushed-to-upstream
+                            ((:right-align t)
+                             (:help-echo "Local changes not in upstream")))
+                           ("Path" 99 magit-repolist-column-path nil))
    magit-diff-use-overlays nil
    magit-save-repository-buffers 'dontask)
   (magit-autofetch-mode)
@@ -638,7 +656,14 @@ dump."
 (defun leo/configure-persp ()
   (setq layouts-enable-autosave t
         layouts-autosave-delay 600)
-  (setq persp-autokill-buffer-on-remove 'kill-weak))
+  ;; (setq persp-autokill-buffer-on-remove 'kill-weak)
+  (setq persp-autokill-buffer-on-remove nil)
+  )
+
+;; hack becasue I ovewrite C-/ for comment
+(define-globalized-minor-mode my-global-undo-tree-mode
+  undo-tree-mode (lambda () (undo-tree-mode 1)))
+
 
 (defun my/org-ref-notes-function (candidates)
   (let ((key (helm-marked-candidates)))
@@ -649,6 +674,8 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+  (my-global-undo-tree-mode 1)
+  (evil-set-undo-system 'undo-tree)
   ;; (setq exec-path-from-shell-arguments '("-i"))
   ;; (setq shell-file-name "/opt/local/bin/zsh")
   ;; (exec-path-from-shell-initialize)
@@ -677,8 +704,6 @@ before packages are loaded."
   (with-eval-after-load 'spaceline-config
     (spacemacs/toggle-mode-line-battery-on)
     (spacemacs/toggle-display-time-on))
-
-  (setq spacemacs-jump-handlers-coq-mode nil)
   ;; (setq shell-file-name "/bin/bash")
   (setq projectile-enable-caching t)
   (global-set-key (kbd "<home>") 'beginning-of-line)
@@ -704,15 +729,10 @@ before packages are loaded."
     (setq dired-use-ls-dired t
           insert-directory-program "/usr/local/bin/gls"
           dired-listing-switches "-aBhl --group-directories-first"))
-  (defvar company-etags-modes '(prog-mode c-mode objc-mode c++-mode java-mode
-                                          jde-mode pascal-mode perl-mode python-mode
-                                          coq-mode
-                                          ))
-  (add-hook 'coq-mode-hook
-            (lambda ()
-              (setq-local projectile-tags-backend 'etags-select)
-              (setq-local dash-at-point-docset "Coq")
-              ))
+  ;; (defvar company-etags-modes '(prog-mode c-mode objc-mode c++-mode java-mode
+  ;;                                         jde-mode pascal-mode perl-mode python-mode
+  ;;                                         coq-mode
+  ;;                                         ))
 
   (add-hook 'LaTeX-mode-hook
             (lambda ()
@@ -752,15 +772,13 @@ before packages are loaded."
                              (kill-buffer-and-window)
                              ))
 
-  (add-to-list 'spacemacs-indent-sensitive-modes 'cryptoline-mode)
+  ;; (add-to-list 'spacemacs-indent-sensitive-modes 'cryptoline-mode)
   (add-to-list 'auto-mode-alist '("\\.gas\\'" . asm-mode))
 
-  (setq leetcode-prefer-language "cpp")
-  (setq leetcode-prefer-sql "mysql")
   (setq python-shell-completion-native-enable nil)
   (setq kill-buffer-query-functions nil)
-  (add-to-list 'load-path "~/source/emacs-mode/simp-isar-mode")
-  (require 'isar-mode)
+  ;; (add-to-list 'load-path "~/source/emacs-mode/simp-isar-mode")
+  ;; (require 'isar-mode)
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
   (use-package visual-fill-column
     :config
@@ -772,15 +790,23 @@ before packages are loaded."
         org-ref-notes-function 'org-ref-notes-function-many-files)
   (setq bibtex-completion-bibliography '("~/bibtex/library.bib")
         bibtex-completion-notes-path "~/org/paper_notes")
-  (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
-  ;; ;; Note that 7 is a magic number of the index where you want to insert the command. You may need to change yours.
-  (helm-add-action-to-source "Edit notes" 'my/org-ref-notes-function helm-source-bibtex 7)
+  (with-eval-after-load 'helm-bibtex
+    (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+    ;; ;; Note that 7 is a magic number of the index where you want to insert the command. You may need to change yours.
+    (helm-add-action-to-source "Edit notes" 'my/org-ref-notes-function helm-source-bibtex 7)
+    (spacemacs/set-leader-keys
+      "ab" 'helm-bibtex)
+  )
   (setq bibtex-completion-notes-template-multiple-files
-        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}"))
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary"))
   (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
           (start-process "open" "*open*" "open" fpath)))
+  (setq terminal-here-terminal-command (list "open" "-a" "iTerm" "."))
+  (setq elisp-dir (expand-file-name "elisp" dotspacemacs-directory))
+  ;; (add-to-load-path elisp-dir)
+  ;; (require 'iscroll)
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

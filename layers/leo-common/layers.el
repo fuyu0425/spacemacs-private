@@ -2,6 +2,6 @@
  '(
    leo-org
    (leo-ibuffer :variables ibuffer-group-buffers-by 'vc)
-   leo-coq
+ ;  leo-coq
    leo-misc
    ))

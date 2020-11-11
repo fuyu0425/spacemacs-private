@@ -19,7 +19,7 @@
    (languagetool :variables
                  langtool-default-language "en-GB"
                  languagetool-show-error-on-jump t
-                 langtool-language-tool-jar "/usr/local/Cellar/languagetool/5.0/libexec/languagetool-commandline.jar")
+                 langtool-language-tool-jar "/usr/local/Cellar/languagetool/5.1/libexec/languagetool-commandline.jar")
   )
  )
 

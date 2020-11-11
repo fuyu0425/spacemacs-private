@@ -12,3 +12,9 @@
 ;; variables
 
 (spacemacs|define-jump-handlers coq-mode)
+(add-hook 'coq-mode-hook
+          (lambda ()
+            (setq-local projectile-tags-backend 'etags-select)
+            (setq-local dash-at-point-docset "Coq")
+            ))
+(setq spacemacs-jump-handlers-coq-mode nil)
