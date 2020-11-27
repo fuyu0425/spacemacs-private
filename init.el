@@ -102,6 +102,7 @@ This function should only modify configuration layer settings."
      (python :variables
              python-backend 'lsp
              python-lsp-server 'mspyls
+             python-formatter 'yapf
              )
      (yaml :variables yaml-enable-lsp t)
      fsharp
@@ -609,7 +610,18 @@ This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump."
                                         ;(spacemacs/dump-modes '(coq-mode LaTeX-mode))
-  )
+       )
+
+(defun when-mac (body)
+  (when (eq system-type 'darwin) (funcall body)))
+
+(defun when-linux (body)
+  (when (eq system-type 'gnu/linux) (funcall body)))
+
+(defun if-mac-else-linux (body_mac body_linux)
+  (if (eq system-type 'darwin)
+      (funcall body_mac)
+    (if (eq system-type 'gnux/linux) (funcall body_linux))))
 
 (defun leo/configure-git ()
   (magit-todos-mode)
@@ -639,7 +651,7 @@ dump."
                            ("Path" 99 magit-repolist-column-path nil))
    magit-diff-use-overlays nil
    magit-save-repository-buffers 'dontask)
-  (magit-autofetch-mode)
+  (when-mac 'magit-autofetch-mode)
   )
 
 (defun leo/configure-evil ()
@@ -806,7 +818,6 @@ before packages are loaded."
   (setq terminal-here-terminal-command (list "open" "-a" "iTerm" "."))
   (setq elisp-dir (expand-file-name "elisp" dotspacemacs-directory))
   ;; (add-to-load-path elisp-dir)
-  ;; (require 'iscroll)
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

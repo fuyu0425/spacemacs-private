@@ -12,7 +12,7 @@
     (direnv-mode)
     (setq direnv-always-show-summary nil)
     :hook
-    ((prog-mode) . direnv-update-environment))
+    ((prog-mode) . direnv--maybe-update-environment))
   )
 
 ;;; packages.el ends here
