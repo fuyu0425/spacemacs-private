@@ -581,12 +581,13 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
 
 (defun my-reset-frame-size (&optional frame)
-  ;; (message ">>> my-reset-frame-size called")
   (interactive)
   (when (display-graphic-p)
     (setq
-     display-width (x-display-pixel-width)
-     display-height (x-display-pixel-height)
+     ;; display-width (x-display-pixel-width)
+     ;; display-height (x-display-pixel-height)
+     display-width (nth 2 (frame-monitor-geometry))
+     display-height (nth 3 (frame-monitor-geometry))
      )
     (setq
      reset-frame-width (round (* display-width 0.9))
@@ -668,9 +669,14 @@ dump."
 (defun leo/configure-persp ()
   (setq layouts-enable-autosave t
         layouts-autosave-delay 600)
-  ;; (setq persp-autokill-buffer-on-remove 'kill-weak)
-  (setq persp-autokill-buffer-on-remove nil)
+  (setq persp-autokill-buffer-on-remove 'kill-weak)
+  ;; (setq persp-autokill-buffer-on-remove nil)
   )
+
+(defun leo/configure-projectile ()
+  (setq projectile-file-exists-local-cache-expire (* 5 60))
+  )
+
 
 ;; hack becasue I ovewrite C-/ for comment
 (define-globalized-minor-mode my-global-undo-tree-mode
@@ -703,6 +709,7 @@ before packages are loaded."
   (leo/configure-git)
   (leo/configure-evil)
   (leo/configure-persp)
+  (leo/configure-projectile)
   ;; turn of symlinks ask
   (setq vc-follow-symlinks t)
 
@@ -761,10 +768,10 @@ before packages are loaded."
   (setq pdf-sync-forward-display-action t)
   (add-hook 'LaTeX-mode-hook #'flyspell-mode)
   (setq google-translate-default-target-language "zh-TW")
-  ;; (add-hook 'focus-out-hook (lambda ()
-  ;;                             (save-some-buffers t)
-  ;;                             (garbage-collect)
-  ;;                             ))
+  (add-hook 'focus-out-hook (lambda ()
+                              (save-some-buffers t)
+                              (garbage-collect)
+                              ))
 
   ;; Some Keyborad Mapping
   ;; Avy jump
@@ -810,7 +817,7 @@ before packages are loaded."
       "ab" 'helm-bibtex)
   )
   (setq bibtex-completion-notes-template-multiple-files
-        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary"))
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Questions\n\n* Abstract\n\n* Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
   (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
@@ -818,6 +825,12 @@ before packages are loaded."
   (setq terminal-here-terminal-command (list "open" "-a" "iTerm" "."))
   (setq elisp-dir (expand-file-name "elisp" dotspacemacs-directory))
   ;; (add-to-load-path elisp-dir)
+  ;; persistent undo
+  (setq undo-tree-auto-save-history t
+        undo-tree-history-directory-alist
+        `(("." . ,(concat spacemacs-cache-directory "undo"))))
+  (unless (file-exists-p (concat spacemacs-cache-directory "undo"))
+    (make-directory (concat spacemacs-cache-directory "undo")))
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))
