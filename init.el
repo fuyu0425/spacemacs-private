@@ -65,8 +65,8 @@ This function should only modify configuration layer settings."
      dash
      (evil-snipe :variables evil-snipe-enable-alternate-f-and-t-behaviors t)
      search-engine
-     ;; pdf
-     leo-pdf
+     pdf
+     ;; leo-pdf
      (latex :variables
             latex-enable-magic t
             latex-enable-folding t)
@@ -76,17 +76,20 @@ This function should only modify configuration layer settings."
              ranger-cleanup-eagerly t
              ranger-show-hidden t)
      ;; languages
+     (shell-scripts :variables shell-scripts-backend 'lsp)
      asm
      (lsp :variables
+          lsp-headerline-breadcrumb-enable nil
           lsp-signature-auto-activate nil
           lsp-ui-doc-enable nil
+          lsp-before-save-edits nil
           ;; lsp-ui-imenu-enable nil
           lsp-eldoc-enable-hover nil)
      dap
      php
      go
      json
-     haskell
+     ;; haskell
      java
      javascript
      ;; scala
@@ -131,7 +134,7 @@ This function should only modify configuration layer settings."
                treemacs-use-scope-type 'Perspectives)
      version-control
      copy-as-format
-     vagrant
+     ;; vagrant
      xclipboard
      ;; my-layers
      leo-common
@@ -167,7 +170,9 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(
+                                    forge
+                                    )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -588,12 +593,14 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
      ;; display-height (x-display-pixel-height)
      display-width (nth 2 (frame-monitor-geometry))
      display-height (nth 3 (frame-monitor-geometry))
+     display-x (nth 0 (frame-monitor-geometry))
+     display-y (nth 1 (frame-monitor-geometry))
      )
     (setq
      reset-frame-width (round (* display-width 0.9))
      reset-frame-height (round (* display-height 0.9) )
-     reset-frame-width-margin (round (* display-width 0.05) )
-     reset-frame-height-margin (round (* display-height 0.05) )
+     reset-frame-width-margin (+ display-x (round (* display-width 0.05)))
+     reset-frame-height-margin (+ display-y (round (* display-height 0.05)))
      )
     (setq frame-resize-pixelwise t)
     (when frame (select-frame frame))
@@ -651,7 +658,9 @@ dump."
                              (:help-echo "Local changes not in upstream")))
                            ("Path" 99 magit-repolist-column-path nil))
    magit-diff-use-overlays nil
-   magit-save-repository-buffers 'dontask)
+   magit-save-repository-buffers 'dontask
+   magit-revision-show-gravatars nil
+   )
   (when-mac 'magit-autofetch-mode)
   )
 
@@ -768,10 +777,10 @@ before packages are loaded."
   (setq pdf-sync-forward-display-action t)
   (add-hook 'LaTeX-mode-hook #'flyspell-mode)
   (setq google-translate-default-target-language "zh-TW")
-  (add-hook 'focus-out-hook (lambda ()
-                              (save-some-buffers t)
-                              (garbage-collect)
-                              ))
+  ;; (add-hook 'focus-out-hook (lambda ()
+  ;;                             (save-some-buffers t)
+  ;;                             (garbage-collect)
+  ;;                             ))
 
   ;; Some Keyborad Mapping
   ;; Avy jump
@@ -793,6 +802,7 @@ before packages are loaded."
 
   ;; (add-to-list 'spacemacs-indent-sensitive-modes 'cryptoline-mode)
   (add-to-list 'auto-mode-alist '("\\.gas\\'" . asm-mode))
+  (add-to-list 'auto-mode-alist '("Dockerfile" . dockerfile-mode))
 
   (setq python-shell-completion-native-enable nil)
   (setq kill-buffer-query-functions nil)
@@ -817,7 +827,7 @@ before packages are loaded."
       "ab" 'helm-bibtex)
   )
   (setq bibtex-completion-notes-template-multiple-files
-        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Questions\n\n* Abstract\n\n* Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Novelty\n\n* TODO Questions\n\n* Abstractand Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
   (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
@@ -831,6 +841,9 @@ before packages are loaded."
         `(("." . ,(concat spacemacs-cache-directory "undo"))))
   (unless (file-exists-p (concat spacemacs-cache-directory "undo"))
     (make-directory (concat spacemacs-cache-directory "undo")))
+  (setq transient-enable-popup-navigation t)
+  (with-eval-after-load 'transient
+    (transient-bind-q-to-quit))
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

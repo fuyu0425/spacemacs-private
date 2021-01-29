@@ -9,6 +9,7 @@
     org-journal
     doct
     (ox-extra :location built-in)
+    org-special-block-extras
     )
   )
 
@@ -208,5 +209,21 @@
     (ox-extras-activate '(ignore-headlines))
     ))
 
+
+(defun leo-org/init-org-special-block-extras ()
+  (use-package org-special-block-extras
+    :ensure t
+    :hook (org-mode . org-special-block-extras-mode)
+    ;; :custom
+    ;; (org-special-block-extras--docs-libraries
+    ;;  '("~/org-special-block-extras/documentation.org")
+    ;;  "The places where I keep my ‘#+documentation’")
+    ;; (org-special-block-extras-fancy-links
+    ;; nil "Disable this feature.")
+    :config
+    ;; Use short names like ‘defblock’ instead of the fully qualified name
+    ;; ‘org-special-block-extras--defblock’
+    (org-special-block-extras-short-names))
+  )
 
 ;;; packages.el ends here
