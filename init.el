@@ -13,6 +13,8 @@
 (add-to-list 'default-frame-alist
              '(ns-appearance . dark)) ;; or dark - depending on your theme
 
+(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+
 (defun dotspacemacs/layers ()
   "Layer configuration:
 This function should only modify configuration layer settings."
@@ -60,8 +62,9 @@ This function should only modify configuration layer settings."
      (better-defaults :variables
                       better-defaults-move-to-beginning-of-code-first t
                       better-defaults-move-to-end-of-code-first t)
-     (colors :variables
-             colors-enable-nyan-cat-progress-bar t)
+     (colors
+      ;; :variables colors-enable-nyan-cat-progress-bar t
+             )
      dash
      (evil-snipe :variables evil-snipe-enable-alternate-f-and-t-behaviors t)
      search-engine
@@ -79,12 +82,22 @@ This function should only modify configuration layer settings."
      (shell-scripts :variables shell-scripts-backend 'lsp)
      asm
      (lsp :variables
+          lsp-idle-delay 1.0
+          lsp-log-io nil
+          lsp-enable-folding nil
+          lsp-enable-symbol-highlighting nil
+          lsp-enable-links nil
           lsp-headerline-breadcrumb-enable nil
           lsp-signature-auto-activate nil
           lsp-ui-doc-enable nil
           lsp-before-save-edits nil
+          lsp-completion-enable-additional-text-edit nil
           ;; lsp-ui-imenu-enable nil
-          lsp-eldoc-enable-hover nil)
+          lsp-eldoc-enable-hover nil
+          lsp-enable-file-watchers nil
+          ;; rust
+          lsp-rust-server 'rust-analyzer
+          )
      dap
      php
      go
@@ -121,7 +134,9 @@ This function should only modify configuration layer settings."
 
      docker
      git
-     version-control
+     (version-control :variables
+                      version-control-diff-tool 'diff-hl)
+
      helm
      (markdown :variables markdown-live-preview-engine 'vmd)
      multiple-cursors
@@ -172,6 +187,7 @@ This function should only modify configuration layer settings."
    ;; A list of packages that will not be installed and loaded.
    dotspacemacs-excluded-packages '(
                                     forge
+                                    evil-magit
                                     )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -232,7 +248,7 @@ It should only modify the values of Spacemacs settings."
    ;; This is an advanced option and should not be changed unless you suspect
    ;; performance issues due to garbage collection operations.
    ;; (default '(100000000 0.1))
-   dotspacemacs-gc-cons '(100000000 0.1)
+   dotspacemacs-gc-cons '(200000000 0.1)
 
    ;; If non-nil then Spacelpa repository is the primary source to install
    ;; a locked version of packages. If nil then Spacemacs will install the
@@ -450,7 +466,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil unicode symbols are displayed in the mode line.
    ;; If you use Emacs as a daemon and wants unicode characters only in GUI set
    ;; the value to quoted `display-graphic-p'. (default t)
-   dotspacemacs-mode-line-unicode-symbols t
+   dotspacemacs-mode-line-unicode-symbols nil
 
    ;; If non-nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters point
@@ -539,7 +555,7 @@ It should only modify the values of Spacemacs settings."
    ;; %z - mnemonics of buffer, terminal, and keyboard coding systems
    ;; %Z - like %z, but including the end-of-line format
    ;; (default "%I@%S")
-   dotspacemacs-frame-title-format "%b@%t"
+   dotspacemacs-frame-title-format nil
 
    ;; Format specification for setting the icon title format
    ;; (default nil - same as frame-title-format)
@@ -550,7 +566,7 @@ It should only modify the values of Spacemacs settings."
    ;; `trailing' to delete only the whitespace at end of lines, `changed' to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup 'trailing
+   dotspacemacs-whitespace-cleanup nil
 
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
@@ -632,8 +648,9 @@ dump."
     (if (eq system-type 'gnux/linux) (funcall body_linux))))
 
 (defun leo/configure-git ()
-  (magit-todos-mode)
+  ;; (magit-todos-mode)
   ;; (magit-delta-mode)
+  (setq magit-refresh-status-buffer nil)
   (setq
    magit-blame-styles '((margin
                          (margin-format " %s%f" " %C %a" " %H")
@@ -731,13 +748,15 @@ before packages are loaded."
   (spacemacs-modeline/init-spaceline)
   (with-eval-after-load 'spaceline-config
     (spacemacs/toggle-mode-line-battery-on)
-    (spacemacs/toggle-display-time-on))
+    (spacemacs/toggle-display-time-on)
+    (spaceline-toggle-minor-modes-off)
+    )
   ;; (setq shell-file-name "/bin/bash")
   (setq projectile-enable-caching t)
   (global-set-key (kbd "<home>") 'beginning-of-line)
   (global-set-key (kbd "<end>") 'end-of-line)
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  ;; (menu-bar-mode 1)
+  (menu-bar-mode -1)
   (setq scroll-preserve-screen-position nil)
   (setq overlay-arrow-string "")
   (defadvice switch-to-buffer (before save-buffer-now activate)
@@ -827,7 +846,7 @@ before packages are loaded."
       "ab" 'helm-bibtex)
   )
   (setq bibtex-completion-notes-template-multiple-files
-        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Novelty\n\n* TODO Questions\n\n* Abstractand Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Novelty\n\n* TODO Questions\n\n* Abstract and Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
   (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
@@ -844,6 +863,31 @@ before packages are loaded."
   (setq transient-enable-popup-navigation t)
   (with-eval-after-load 'transient
     (transient-bind-q-to-quit))
+
+  (with-eval-after-load 'org
+    (add-to-list 'org-latex-packages-alist '("" "minted"))
+    (setq org-latex-listings 'minted)
+    (setq org-latex-minted-options
+          '(("frame" "lines") ("linenos=true")))
+    (setq org-latex-pdf-process
+          '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+            "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+    )
+  (define-key spacemacs-latex-mode-map-root-map (kbd "<f5>") 'latex/build)
+  ;; (evil-global-set-key 'normal "S" #'flyspell-correct-at-point)
+  (setq
+   lsp-diagnostics-provider :auto
+   company-idle-delay 1.0
+   company-minimum-prefix-length 3)
+  ;; refresh keychain
+  (run-with-timer
+   300
+   3600
+   'keychain-refresh-environment)
+  (with-eval-after-load 'treemacs
+    (treemacs-follow-mode -1)
+    (treemacs-filewatch-mode -1))
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

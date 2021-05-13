@@ -9,3 +9,5 @@
   'org-mode
   "bR" 'org-babel-kill-and-restart-session-to-point
   "bk" 'org-babel-kill-session)
+
+(define-key org-mode-map (kbd "<f5>") 'org-latex-export-to-pdf)

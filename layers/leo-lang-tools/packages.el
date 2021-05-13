@@ -16,9 +16,10 @@
     (sdcv-mode :location (recipe
                           :fetcher github
                           :repo "gucong/emacs-sdcv"))
-    (emacs-grammarly :location (recipe
-                                :fetcher github
-                                :repo "mmagnus/emacs-grammarly"))))
+    ;; (emacs-grammarly :location (recipe
+    ;;                             :fetcher github
+    ;;                             :repo "mmagnus/emacs-grammarly"))
+    ))
 
 (defun leo-lang-tools/init-mw-thesaurus ()
   (use-package mw-thesaurus
