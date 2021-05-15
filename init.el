@@ -166,6 +166,7 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
+                                      xclip
                                       all-the-icons
                                       all-the-icons-dired
                                       magit-todos
@@ -888,6 +889,8 @@ before packages are loaded."
   (with-eval-after-load 'treemacs
     (treemacs-follow-mode -1)
     (treemacs-filewatch-mode -1))
+  ;; make xclip a default behavior => make evil-yank use xclip/xsel
+  (xclip-mode 1)
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))
