@@ -1,11 +1,12 @@
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
-(add-to-list 'command-switch-alist
-             (cons "persp-q"
-                   #'(lambda (p)
-                       (setq persp-auto-resume-time -1
-                             persp-auto-save-opt 0))))
+
+(let*
+  ((last-args (car (cdr command-line-args))))
+  (if (equal "-persp-q" last-args)
+      (setq persp-auto-resume-time -1
+            persp-auto-save-opt 0)))
 
 (add-to-list 'default-frame-alist
              '(ns-transparent-titlebar . t))
@@ -166,6 +167,8 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
+                                      (explain-pause-mode :location (recipe :fetcher github :repo "lastquestion/explain-pause-mode"))
+                                      org-fragtog
                                       xclip
                                       all-the-icons
                                       all-the-icons-dired
@@ -177,7 +180,7 @@ This function should only modify configuration layer settings."
                                       keychain-environment
                                       magit-delta
                                       paren-face
-                                      visual-fill-column
+                                      ;; visual-fill-column
                                       jetbrains-darcula-theme
                                       xenops
                                       )
@@ -189,6 +192,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-excluded-packages '(
                                     forge
                                     evil-magit
+                                    importmagic
                                     )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -339,7 +343,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; Default font or prioritized list of fonts.
    dotspacemacs-default-font '("Monaco"
-                               :size 14
+                               :size 14.0
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -745,6 +749,7 @@ before packages are loaded."
   (add-hook 'text-mode-hook 'turn-on-visual-line-mode)
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
   (spacemacs/toggle-highlight-long-lines-globally-off)
+  (spacemacs/toggle-mode-line-battery-off)
   (spacemacs/toggle-indent-guide-globally-on)
   (spacemacs-modeline/init-spaceline)
   (with-eval-after-load 'spaceline-config
@@ -829,11 +834,11 @@ before packages are loaded."
   ;; (add-to-list 'load-path "~/source/emacs-mode/simp-isar-mode")
   ;; (require 'isar-mode)
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-  (use-package visual-fill-column
-    :config
-    (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
-    (setq-default split-window-preferred-function 'visual-fill-column-split-window-sensibly)
-    (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
+  ;; (use-package visual-fill-column
+  ;;   :config
+  ;;   (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
+  ;;   (setq-default split-window-preferred-function 'visual-fill-column-split-window-sensibly)
+  ;;   (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
   (setq reftex-default-bibliography '("~/bibtex/library.bib"))
   (setq org-ref-default-bibliography '("~/bibtex/library.bib")
         org-ref-notes-function 'org-ref-notes-function-many-files)
@@ -856,9 +861,9 @@ before packages are loaded."
   (setq elisp-dir (expand-file-name "elisp" dotspacemacs-directory))
   ;; (add-to-load-path elisp-dir)
   ;; persistent undo
-  (setq undo-tree-auto-save-history t
-        undo-tree-history-directory-alist
-        `(("." . ,(concat spacemacs-cache-directory "undo"))))
+  ;; (setq undo-tree-auto-save-history t
+  ;;       undo-tree-history-directory-alist
+  ;;       `(("." . ,(concat spacemacs-cache-directory "undo"))))
   (unless (file-exists-p (concat spacemacs-cache-directory "undo"))
     (make-directory (concat spacemacs-cache-directory "undo")))
   (setq transient-enable-popup-navigation t)
@@ -891,6 +896,8 @@ before packages are loaded."
     (treemacs-filewatch-mode -1))
   ;; make xclip a default behavior => make evil-yank use xclip/xsel
   (xclip-mode 1)
+  (add-hook 'org-mode-hook 'org-fragtog-mode)
+  ;; (explain-pause-mode 1)
   )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))

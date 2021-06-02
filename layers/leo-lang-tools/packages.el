@@ -1,3 +1,4 @@
+;; credit: https://github.com/agzam/.spacemacs.d/blob/master/layers/ag-lang-tools/packages.el
 (defconst leo-lang-tools-packages
   '((mw-thesaurus
      :location (recipe :fetcher github :repo "agzam/mw-thesaurus.el")
@@ -19,6 +20,11 @@
     ;; (emacs-grammarly :location (recipe
     ;;                             :fetcher github
     ;;                             :repo "mmagnus/emacs-grammarly"))
+    ;; (keytar :location
+    ;;         (recipe :fetcher github
+    ;;                 :repo "emacs-grammarly/keytar"))
+    ;; (lsp-grammarly
+    ;;  :location (recipe :fetcher github :repo "emacs-grammarly/lsp-grammarly"))
     ))
 
 (defun leo-lang-tools/init-mw-thesaurus ()
@@ -88,4 +94,17 @@
     (spacemacs/set-leader-keys
       "xlg" #'grammarly-save-region-and-run)))
 
+(defun leo-lang-tools/init-lsp-grammarly ()
+  (use-package lsp-grammarly
+    :hook ((text-mode org-mode latex-mode markdown-mode) . (lambda ()
+                         (require 'lsp-grammarly)
+                         (lsp-deferred)))
+    :config
+    (setq lsp-grammarly-domain "technical"
+          lsp-grammarly-audience "expert")))
+
+(defun leo-lang-tools/init-keytar ()
+  (use-package keytar
+    :config
+    (require 'keytar)))
 ;; (setq ispell-program-name "aspell")
