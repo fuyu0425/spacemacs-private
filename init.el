@@ -83,19 +83,22 @@ This function should only modify configuration layer settings."
      (shell-scripts :variables shell-scripts-backend 'lsp)
      asm
      (lsp :variables
+          lsp-keep-workspace-alive nil
           lsp-idle-delay 1.0
           lsp-log-io nil
           lsp-enable-folding nil
+          lsp-enable-text-document-color nil
           lsp-enable-symbol-highlighting nil
           lsp-enable-links nil
           lsp-headerline-breadcrumb-enable nil
           lsp-signature-auto-activate nil
-          lsp-ui-doc-enable nil
           lsp-before-save-edits nil
           lsp-completion-enable-additional-text-edit nil
-          ;; lsp-ui-imenu-enable nil
+          lsp-enable-on-type-formatting nil
           lsp-eldoc-enable-hover nil
           lsp-enable-file-watchers nil
+          lsp-ui-doc-enable nil
+          ;; lsp-ui-imenu-enable nil
           ;; rust
           lsp-rust-server 'rust-analyzer
           )
@@ -127,6 +130,31 @@ This function should only modify configuration layer settings."
      vimscript
      ruby
      ;; tools
+     gnus
+     (mu4e :variables
+           mu4e-use-maildirs-extension t
+           user-mail-address "a0919610611@gmail.com"
+           mu4e-installation-path "/usr/local/Cellar/mu/1.4.15/share/emacs/site-lisp"
+           mu4e-maildir "~/.mail"
+           mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+           mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+           mu4e-trash-folder "/gmail/[Gmail]/Trash"
+           mu4e-change-filenames-when-moving t
+           mu4e-get-mail-command "mbsync -a"
+           mu4e-update-interval 900
+           mu4e-maildir-shortcuts '(("/gmail/INBOX" . ?g))
+           mu4e-bookmarks
+                 `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
+                   ("date:today..now" "Today's messages" ?t)
+                   ("date:7d..now" "Last 7 days" ?w)
+                   ("mime:image/*" "Messages with images" ?p)
+                   (,(mapconcat 'identity
+                                (mapcar
+                                 (lambda (maildir)
+                                   (concat "maildir:" (car maildir)))
+                                 mu4e-maildir-shortcuts) " OR ")
+                    "All inboxes" ?i))
+           )
      pandoc
      helpful
      (cmake
@@ -167,6 +195,7 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
+                                      mu4e-views
                                       (explain-pause-mode :location (recipe :fetcher github :repo "lastquestion/explain-pause-mode"))
                                       org-fragtog
                                       xclip
@@ -897,15 +926,51 @@ before packages are loaded."
   ;; make xclip a default behavior => make evil-yank use xclip/xsel
   (xclip-mode 1)
   (add-hook 'org-mode-hook 'org-fragtog-mode)
+  (spacemacs/set-leader-keys
+    "atl" 'lsp)
+  ;; (define-key mu4e-headers-mode-map (kbd "R"))
+  (use-package mu4e-views
+  :after mu4e
+  :defer nil
+  :bind (:map mu4e-headers-mode-map
+	    ("v" . mu4e-views-mu4e-select-view-msg-method) ;; select viewing method
+	    ("M-n" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
+	    ("M-p" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
+        ("f" . mu4e-views-toggle-auto-view-selected-message) ;; toggle opening messages automatically when moving in the headers view
+        ("i" . mu4e-views-mu4e-view-as-nonblocked-html) ;; show currently selected email with all remote content
+	    )
+  :config
+  (setq mu4e-views-completion-method 'helm) ;; use ivy for completion
+  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
+  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
+  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window) ;; when pressing n and p stay in the current window
+  (setq mu4e-views-auto-view-selected-message nil)) ;; automatically open messages when moving in the headers view
   ;; (explain-pause-mode 1)
-  )
+  (defun mu4e-views-mu4e-view-in-browser ()
+    "Wraps the `mu4e-view-action' function.
+Passes on the message stored in `mu4e-views--current-mu4e-message'."
+    (interactive)
+    (mu4e-action-view-in-browser mu4e-views--current-mu4e-message))
+  (define-key mu4e-views-view-actions-mode-map (kbd "v") 'mu4e-views-mu4e-view-in-browser)
+  (define-key mu4e-headers-mode-map (kbd "v") 'mu4e-action-view-in-browser)
+  (setq gnus-keep-backlog t
+        gnus-asynchronous t
+        gnus-use-cache  t
+        gnus-save-newsrc-file nil
+        gnus-read-newsrc-file nil)
+  (setq gnus-select-method '(nnml ""))
+  (setq gnus-secondary-select-methods '((nntp "news.gwene.org")))
+  (remove-hook 'gnus-mark-article-hook
+               'gnus-summary-mark-read-and-unread-as-read)
+  (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+
+)
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))
 (load custom-file 'no-error 'no-message)
 
 (setq secret-file (expand-file-name "secret.el" dotspacemacs-directory))
 (load secret-file 'no-error 'no-message)
-
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
