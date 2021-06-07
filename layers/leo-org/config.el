@@ -15,5 +15,6 @@
 (setq org-babel-python-command "python -ic ''")
 (setq org-download-image-org-width 650)
 (setq org-download-annotate-function (lambda (_link) ""))
+(setq org-roam-directory "~/org/roam")
 ; (require 'ox-extra)
 ; (ox-extras-activate '(ignore-headlines))
