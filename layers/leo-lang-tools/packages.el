@@ -20,11 +20,11 @@
     ;; (emacs-grammarly :location (recipe
     ;;                             :fetcher github
     ;;                             :repo "mmagnus/emacs-grammarly"))
-    ;; (keytar :location
-    ;;         (recipe :fetcher github
-    ;;                 :repo "emacs-grammarly/keytar"))
-    ;; (lsp-grammarly
-    ;;  :location (recipe :fetcher github :repo "emacs-grammarly/lsp-grammarly"))
+    (keytar :location
+            (recipe :fetcher github
+                    :repo "emacs-grammarly/keytar"))
+    (lsp-grammarly
+     :location (recipe :fetcher github :repo "emacs-grammarly/lsp-grammarly"))
     ))
 
 (defun leo-lang-tools/init-mw-thesaurus ()
@@ -96,12 +96,13 @@
 
 (defun leo-lang-tools/init-lsp-grammarly ()
   (use-package lsp-grammarly
-    :hook ((text-mode org-mode latex-mode markdown-mode) . (lambda ()
-                         (require 'lsp-grammarly)
-                         (lsp-deferred)))
+    ;; :hook ((text-mode org-mode latex-mode markdown-mode) . (lambda ()
+    ;;                      (require 'lsp-grammarly)
+    ;;                      (lsp-deferred)))
     :config
     (setq lsp-grammarly-domain "technical"
-          lsp-grammarly-audience "expert")))
+          lsp-grammarly-audience "expert"
+          lsp-grammarly-auto-activate t)))
 
 (defun leo-lang-tools/init-keytar ()
   (use-package keytar
