@@ -3,3 +3,7 @@ mthesaur.txt.cache
 custom.el
 eshell.aliases
 .spacemacs.env
+!private/
+private/*
+!private/README.md
+

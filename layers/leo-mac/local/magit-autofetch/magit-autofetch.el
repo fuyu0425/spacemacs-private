@@ -94,8 +94,8 @@ parameters."
                     :buffer "*magit-autofetch-ping"
                     :command `("ping" "-c" "1" "-W" "3" ,magit-autofetch-ping-host)
                     :sentinel 'magit-autofetch--ping-sentinel
-                    :noquery t)
-      (magit-autofetch--work)))
+                    :noquery t))
+      (magit-autofetch--work))
 
 (defun magit-autofetch--ping-sentinel (process event)
   "Sentinel function for PROCESS to check ping success given EVENT."
