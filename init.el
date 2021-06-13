@@ -16,6 +16,18 @@
 
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
 
+
+(defun when-mac (body)
+  (when (eq system-type 'darwin) (funcall body)))
+
+(defun when-linux (body)
+  (when (eq system-type 'gnu/linux) (funcall body)))
+
+(defun if-mac-else-linux (body_mac body_linux)
+  (if (eq system-type 'darwin)
+      (funcall body_mac)
+    (if (eq system-type 'gnux/linux) (funcall body_linux))))
+
 (defun dotspacemacs/layers ()
   "Layer configuration:
 This function should only modify configuration layer settings."
@@ -124,37 +136,55 @@ This function should only modify configuration layer settings."
              python-lsp-server 'mspyls
              python-formatter 'yapf
              )
+     (ipython-notebook :variables ein-backend 'jupyter)
      (yaml :variables yaml-enable-lsp t)
      fsharp
      lua
      vimscript
      ruby
      ;; tools
-     gnus
-     (mu4e :variables
-           mu4e-use-maildirs-extension t
-           user-mail-address "a0919610611@gmail.com"
-           mu4e-installation-path "/usr/local/Cellar/mu/1.4.15/share/emacs/site-lisp"
-           mu4e-maildir "~/.mail"
-           mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
-           mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-           mu4e-trash-folder "/gmail/[Gmail]/Trash"
-           mu4e-change-filenames-when-moving t
-           mu4e-get-mail-command "mbsync -a"
-           mu4e-update-interval 900
-           mu4e-maildir-shortcuts '(("/gmail/INBOX" . ?g))
-           mu4e-bookmarks
-                 `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
-                   ("date:today..now" "Today's messages" ?t)
-                   ("date:7d..now" "Last 7 days" ?w)
+     prodigy ; services
+     (elfeed :variables rmh-elfeed-org-files '(,(expand-file-name "private/elfeed.org" dotspacemacs-directory)))
+     ,(if (eq system-type 'darwin) 'gnus)
+     ,(if (eq system-type 'darwin)
+          '(mu4e :variables
+                 mu4e-mu-binary "/usr/local/Cellar/mu/1.4.15/bin/mu"
+                 user-mail-address "a0919610611@gmail.com"
+                 mu4e-installation-path "/usr/local/Cellar/mu/1.4.15/share/emacs/site-lisp"
+                 mu4e-maildir "~/.mail"
+                 mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+                 mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+                 mu4e-trash-folder "/gmail/[Gmail]/Trash"
+                 mu4e-attachment-dir "~/Downloads"
+                 mu4e-sent-messages-behavior 'delete
+                 ;; https://www.reddit.com/r/emacs/comments/8q84dl/tip_how_to_easily_manage_your_emails_with_mu4e/
+                 mu4e-change-filenames-when-moving t
+                 mu4e-get-mail-command "mbsync -a"
+                 mu4e-update-interval 900
+                 mu4e-maildir-shortcuts '(("/gmail/INBOX" . ?g)
+                                          ("/gatech/INBOX" . ?G))
+                 mu4e-bookmarks
+                 `(("flag:unread AND NOT flag:trashed AND NOT (\"maildir:/gmail/[Gmail]/Sent Mail\" OR maildir:/gmail/[Gmail]/Drafts OR maildir:/gatech/Sent Items OR maildir:/gatech/Drafts)" "Unread messages" ?u)
+                   ("date:today..now AND NOT (\"maildir:/gmail/[Gmail]/Sent Mail\" OR maildir:/gmail/[Gmail]/Drafts OR \"maildir:/gatech/Sent Items\" OR maildir:/gatech/Drafts)" "Today's messages" ?t)
+                   ("date:7d..now AND NOT (maildir:/gmail/[Gmail]/Sent Mail OR maildir:/gmail/[Gmail]/Drafts OR maildir:/gatech/Sent Items OR maildir:/gatech/Drafts)" "Last 7 days" ?w)
                    ("mime:image/*" "Messages with images" ?p)
                    (,(mapconcat 'identity
                                 (mapcar
                                  (lambda (maildir)
                                    (concat "maildir:" (car maildir)))
                                  mu4e-maildir-shortcuts) " OR ")
-                    "All inboxes" ?i))
-           )
+                    "All inboxes" ?i)
+                   )
+                 mu4e-enable-mode-line t
+                 mu4e-enable-async-operations t
+                 mu4e-use-maildirs-extension t
+                 mu4e-maildirs-extension-hide-empty-maildirs t
+                 ;; alert
+                 mu4e-enable-notifications t
+                 mu4e-alert-email-notification-types '(subjects)
+
+                 ))
+     ;; smex
      pandoc
      helpful
      (cmake
@@ -166,7 +196,8 @@ This function should only modify configuration layer settings."
      (version-control :variables
                       version-control-diff-tool 'diff-hl)
 
-     helm
+     ;; helm
+     ivy
      (markdown :variables markdown-live-preview-engine 'vmd)
      multiple-cursors
      deft
@@ -195,6 +226,16 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
+                                      company-posframe
+                                      ivy-posframe
+                                      all-the-icons-ibuffer
+                                      all-the-icons-ivy-rich
+                                      burly
+                                      bufler
+                                      ;; helm-bufler
+                                      (mu4e-dashboard :location (recipe :fetcher github :repo "rougier/mu4e-dashboard"))
+                                      (elfeed-dashboard :location (recipe :fetcher github :repo "Manoj321/elfeed-dashboard"))
+                                      devdocs-browser
                                       mu4e-views
                                       (explain-pause-mode :location (recipe :fetcher github :repo "lastquestion/explain-pause-mode"))
                                       org-fragtog
@@ -203,6 +244,7 @@ This function should only modify configuration layer settings."
                                       all-the-icons-dired
                                       magit-todos
                                       z3-mode
+                                      org-pdftools
                                       ;; org-noter
                                       exec-path-from-shell
                                       ssh-agency
@@ -212,6 +254,8 @@ This function should only modify configuration layer settings."
                                       ;; visual-fill-column
                                       jetbrains-darcula-theme
                                       xenops
+                                      s ;; s.el
+                                      org-roam-bibtex
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -372,7 +416,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; Default font or prioritized list of fonts.
    dotspacemacs-default-font '("Monaco"
-                               :size 14.0
+                               :size 16.0
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -527,6 +571,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-line-numbers '(:enabled-for-modes
                                ;; coq-mode
+                               mu4e-main-mode
                                prog-mode
                                text-mode
                                treemacs-mode
@@ -670,17 +715,6 @@ dump."
                                         ;(spacemacs/dump-modes '(coq-mode LaTeX-mode))
        )
 
-(defun when-mac (body)
-  (when (eq system-type 'darwin) (funcall body)))
-
-(defun when-linux (body)
-  (when (eq system-type 'gnu/linux) (funcall body)))
-
-(defun if-mac-else-linux (body_mac body_linux)
-  (if (eq system-type 'darwin)
-      (funcall body_mac)
-    (if (eq system-type 'gnux/linux) (funcall body_linux))))
-
 (defun leo/configure-git ()
   ;; (magit-todos-mode)
   ;; (magit-delta-mode)
@@ -761,7 +795,7 @@ before packages are loaded."
   ;; (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
   (my-reset-frame-size)
   (add-hook 'after-make-frame-functions 'my-reset-frame-size t)
-  (defvaralias 'helm-c-yas-space-match-any-greedy 'helm-yas-space-match-any-greedy "Temporary alias for Emacs27")
+  ;; (defvaralias 'helm-c-yas-space-match-any-greedy 'helm-yas-space-match-any-greedy "Temporary alias for Emacs27")
   (setq auto-save-interval 60)
   (setq tags-add-tables nil)
   (setq inhibit-compacting-font-caches t)
@@ -774,7 +808,7 @@ before packages are loaded."
   (setq vc-follow-symlinks t)
 
   ;; (setq garbage-collection-messages t)
-  (setq-default fill-column 100)
+  (setq-default fill-column 80)
   (add-hook 'text-mode-hook 'turn-on-visual-line-mode)
   (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
   (spacemacs/toggle-highlight-long-lines-globally-off)
@@ -791,7 +825,7 @@ before packages are loaded."
   (global-set-key (kbd "<home>") 'beginning-of-line)
   (global-set-key (kbd "<end>") 'end-of-line)
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-  (menu-bar-mode -1)
+  (menu-bar-mode 1)
   (setq scroll-preserve-screen-position nil)
   (setq overlay-arrow-string "")
   (defadvice switch-to-buffer (before save-buffer-now activate)
@@ -800,12 +834,21 @@ before packages are loaded."
     (when buffer-file-name (save-buffer)))
   (defadvice winum-select-window-by-number (before other-window-now activate)
     (when buffer-file-name (save-buffer)))
-  (setq my-helm-swoop-previous-key (kbd "C-s"))
-  (setq my-helm-swoop-next-key (kbd "C-a"))
-  (eval-after-load "helm"
+  ;; (setq my-helm-swoop-previous-key (kbd "C-s"))
+  ;; (setq my-helm-swoop-next-key (kbd "C-a"))
+  ;; (eval-after-load "helm"
+  ;;   (lambda ()
+  ;;     (define-key helm-map my-helm-swoop-previous-key 'previous-history-element)
+  ;;     (define-key helm-map my-helm-swoop-next-key 'next-history-element)
+  ;;     ))
+  (setq minibuffer-previous-key (kbd "C-s"))
+  (setq minibuffer-next-key (kbd "C-a"))
+  (eval-after-load "ivy"
     (lambda ()
-      (define-key helm-map my-helm-swoop-previous-key 'previous-history-element)
-      (define-key helm-map my-helm-swoop-next-key 'next-history-element)
+      (define-key ivy-minibuffer-map minibuffer-previous-key 'previous-history-element)
+      (define-key ivy-minibuffer-map minibuffer-next-key 'next-history-element)
+      (define-key ivy-mode-map minibuffer-previous-key 'previous-history-element)
+      (define-key ivy-mode-map minibuffer-next-key 'next-history-element)
       ))
   (when (eq system-type 'darwin)
     (setq dired-use-ls-dired t
@@ -868,27 +911,63 @@ before packages are loaded."
   ;;   (add-hook 'visual-line-mode-hook #'visual-fill-column-mode)
   ;;   (setq-default split-window-preferred-function 'visual-fill-column-split-window-sensibly)
   ;;   (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust))
-  (setq reftex-default-bibliography '("~/bibtex/library.bib"))
-  (setq org-ref-default-bibliography '("~/bibtex/library.bib")
+  (setq reftex-default-bibliography '("~/org/bibtex/library.bib"))
+  (setq org-ref-default-bibliography '("~/org/bibtex/library.bib")
+        org-ref-pdf-directory "~/org/papers/"
         org-ref-notes-function 'org-ref-notes-function-many-files)
-  (setq bibtex-completion-bibliography '("~/bibtex/library.bib")
+  (setq bibtex-completion-bibliography '("~/org/bibtex/library.bib")
+        bibtex-completion-library-path '("~/org/papers")
         bibtex-completion-notes-path "~/org/paper_notes")
-  (with-eval-after-load 'helm-bibtex
-    (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
-    ;; ;; Note that 7 is a magic number of the index where you want to insert the command. You may need to change yours.
-    (helm-add-action-to-source "Edit notes" 'my/org-ref-notes-function helm-source-bibtex 7)
-    (spacemacs/set-leader-keys
-      "ab" 'helm-bibtex)
-  )
-  (setq bibtex-completion-notes-template-multiple-files
-        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Novelty\n\n* TODO Questions\n\n* Abstract and Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
-  (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
+  (setq bibtex-completion-pdf-field "file")
+  (setq bibtex-completion-find-additional-pdfs t)
+
+  (defun bibtex-completion-open-pdf-external (keys &optional fallback-action)
+    (let ((bibtex-completion-pdf-open-function
+           (lambda (fpath) (start-process "open" "*open*" "open" fpath))))
+      (bibtex-completion-open-pdf keys fallback-action)))
+  
+  (defun bibtex-completion-open-pdf-emacs (keys &optional fallback-action)
+    (let ((bibtex-completion-pdf-open-function
+           (lambda (fpath) (find-file fpath))))
+      (bibtex-completion-open-pdf keys fallback-action)))
+
+
+  (require 'ivy-bibtex)
   (setq bibtex-completion-pdf-open-function
-        (lambda (fpath)
-          (start-process "open" "*open*" "open" fpath)))
+        (lambda (fpath) (start-process "open" "*open*" "open" fpath)))
+  ;; (ivy-bibtex-ivify-action bibtex-completion-open-pdf-external ivy-bibtex-open-pdf-external)
+  (ivy-bibtex-ivify-action bibtex-completion-open-pdf-emacs ivy-bibtex-open-pdf-emacs)
+
+  ;; (ivy-add-actions
+  ;;  'ivy-bibtex
+  ;;  '(("P" ivy-bibtex-open-pdf-external "Open PDF file in external viewer (if present)")))
+
+  (ivy-add-actions
+   'ivy-bibtex
+   '(("P" ivy-bibtex-open-pdf-emacs "Open PDF in Emacs")))
+
+  (with-eval-after-load 'ivy-bibtex
+    (spacemacs/set-leader-keys
+      "ab" 'ivy-bibtex))
+  (setq bibtex-completion-notes-template-multiple-files
+        (format "#+TITLE: ${title}\n#+AUTHOR: ${author-or-editor}\n#+KEY: ${=key=}\n#+KEYWORDS: ${keywords}\n#+PROPERTIES: NOTER_DOCUMENT ${file}\n#+YEAR: ${year}\n\ncite:${=key=}\n\n* TODO Summary\n\n* TODO Novelty\n\n* TODO Questions\n\n* Abstract and Introduction\n\n* Related Work\n\n* System Design\n\n* Evaluation"))
+  ;; (setq org-ref-get-pdf-filename-function 'org-ref-get-mendeley-filename)
   (setq terminal-here-terminal-command (list "open" "-a" "iTerm" "."))
   (setq elisp-dir (expand-file-name "elisp" dotspacemacs-directory))
-  ;; (add-to-load-path elisp-dir)
+  (add-to-list 'load-path elisp-dir)
+  (require 'mu4e-thread-folding)
+  (setq mu4e-thread-folding-default-view 'folded)
+
+  (add-to-list 'mu4e-header-info-custom
+               '(:empty . (:name "Empty"
+                                 :shortname ""
+                                 :function (lambda (msg) "  "))))
+  (setq mu4e-headers-fields '((:empty         .    2)
+                              (:human-date    .   12)
+                              (:flags         .    6)
+                              (:mailing-list  .   10)
+                              (:from          .   22)
+                              (:subject       .   nil)))
   ;; persistent undo
   ;; (setq undo-tree-auto-save-history t
   ;;       undo-tree-history-directory-alist
@@ -934,25 +1013,28 @@ before packages are loaded."
   :defer nil
   :bind (:map mu4e-headers-mode-map
 	    ("v" . mu4e-views-mu4e-select-view-msg-method) ;; select viewing method
-	    ("M-n" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
-	    ("M-p" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
+	    ("M-j" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
+	    ("M-k" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
         ("f" . mu4e-views-toggle-auto-view-selected-message) ;; toggle opening messages automatically when moving in the headers view
         ("i" . mu4e-views-mu4e-view-as-nonblocked-html) ;; show currently selected email with all remote content
 	    )
   :config
-  (setq mu4e-views-completion-method 'helm) ;; use ivy for completion
+  ;; (setq mu4e-views-completion-method 'helm) ;; use ivy for completion
+  (setq mu4e-views-completion-method 'ivy) ;; use ivy for completion
   (setq mu4e-views-default-view-method "html") ;; make xwidgets default
   (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
   (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window) ;; when pressing n and p stay in the current window
-  (setq mu4e-views-auto-view-selected-message nil)) ;; automatically open messages when moving in the headers view
+  (setq mu4e-views-auto-view-selected-message t)) ;; automatically open messages when moving in the headers view
   ;; (explain-pause-mode 1)
   (defun mu4e-views-mu4e-view-in-browser ()
     "Wraps the `mu4e-view-action' function.
 Passes on the message stored in `mu4e-views--current-mu4e-message'."
     (interactive)
     (mu4e-action-view-in-browser mu4e-views--current-mu4e-message))
+
   (define-key mu4e-views-view-actions-mode-map (kbd "v") 'mu4e-views-mu4e-view-in-browser)
-  (define-key mu4e-headers-mode-map (kbd "v") 'mu4e-action-view-in-browser)
+  (define-key mu4e-view-mode-map (kbd "v") 'mu4e-views-mu4e-view-in-browser)
+  ;; (define-key mu4e-headers-mode-map (kbd "v") 'mu4e-action-view-in-browser)
   (setq gnus-keep-backlog t
         gnus-asynchronous t
         gnus-use-cache  t
@@ -963,7 +1045,329 @@ Passes on the message stored in `mu4e-views--current-mu4e-message'."
   (remove-hook 'gnus-mark-article-hook
                'gnus-summary-mark-read-and-unread-as-read)
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+  (with-eval-after-load 'elfeed
+    (run-with-timer 0 (* 60 60 4) 'elfeed-update))
+  (spacemacs|define-custom-layout "@elfeed"
+    :binding "f"
+    :body
+    (call-interactively 'elfeed))
+  ;; https://github.com/zamansky/using-emacs/blob/master/myinit.org
+  (require 'elfeed)
+  (setq elfeed-search-remain-on-entry t)
+  (defun elfeed-mark-all-as-read ()
+	  (interactive)
+	  (mark-whole-buffer)
+	  (elfeed-search-untag-all-unread))
 
+
+  ;;functions to support syncing .elfeed between machines
+  ;;makes sure elfeed reads index from disk before launching
+  (defun bjm/elfeed-load-db-and-open ()
+    "Wrapper to load the elfeed db from disk before opening"
+    (interactive)
+    (elfeed-db-load)
+    (elfeed)
+    (elfeed-search-update--force))
+
+  ;;write to disk when quiting
+  (defun bjm/elfeed-save-db-and-bury ()
+    "Wrapper to save the elfeed db to disk before burying buffer"
+    (interactive)
+    (elfeed-db-save)
+    (quit-window))
+
+  (defalias 'elfeed-toggle-star
+    (elfeed-expose #'elfeed-search-toggle-all 'star))
+
+  (with-eval-after-load 'elfeed
+                       (define-key elfeed-search-mode-map (kbd "J") 'leo/make-and-run-elfeed-hydra))
+
+  (defun z/hasCap (s) ""
+	       (let ((case-fold-search nil))
+	         (string-match-p "[[:upper:]]" s)
+	         ))
+
+  (defun z/get-hydra-option-key (s)
+    "returns single upper case letter (converted to lower) or first"
+    (interactive)
+    (let ( (loc (z/hasCap s)))
+      (if loc
+	        (downcase (substring s loc (+ loc 1)))
+	      (substring s 0 1)
+        )))
+
+  (defun leo/make-elfeed-cats (tags)
+    "Returns a list of lists. Each one is line for the hydra configuratio in the form
+       (c function hint)"
+    (interactive)
+    (remove nil (mapcar (lambda (tag)
+	            (let* (
+		                 (tagstring (symbol-name tag))
+		                 (c (z/get-hydra-option-key tagstring))
+		                 )
+                (if (not (string= tagstring "star"))
+		            (list c (append '(elfeed-search-set-filter) (list (format "@6-months-ago +%s" tagstring) ))tagstring)
+                (list)
+                )))
+	          tags)))
+
+  (defun elfeed-filter-toggle-unread ()
+    (interactive)
+    (let* (
+           (taglist (s-split " " elfeed-search-filter))
+           (in (member "+unread" taglist))
+           )
+    (if in
+        (elfeed-search-set-filter (s-join " " (remove "+unread" taglist)))
+      (elfeed-search-set-filter (concat elfeed-search-filter " +unread"))
+     )
+    ))
+
+  (defmacro leo/make-elfeed-hydra ()
+    `(defhydra leo/hydra-elfeed ()
+       "filter"
+       ,@(leo/make-elfeed-cats (elfeed-db-get-all-tags))
+       ("*" (elfeed-search-set-filter "@6-months-ago +star") "Starred")
+       ("M" elfeed-toggle-star "Mark")
+       ("R" elfeed-filter-toggle-unread "(un)read")
+       ("A" (elfeed-search-set-filter "@6-months-ago") "All")
+       ("T" (elfeed-search-set-filter "@1-day-ago") "Today")
+       ("Q" bjm/elfeed-save-db-and-bury "Quit Elfeed" :color blue)
+       ("q" nil "quit" :color blue)
+       ))
+  (defvar elfeed-is-unread t)
+  (defun leo/elfeed-toggle-unread ()
+    (interactive)
+    (setq elfeed-is-unread (not elfeed-is-unread))
+    (elfeed-filter-toggle-unread))
+  (defun leo/make-and-run-elfeed-hydra ()
+    ""
+    (interactive)
+    (leo/make-elfeed-hydra)
+    (leo/hydra-elfeed/body))
+
+  (defun leo/elfeed-construct-filter (tag)
+    (interactive "MTag Name: ")
+    (let* ((filter-string (pcase tag
+                           ("Today" (format "@1-day-ago"))
+                           ("All" (format "@6-months-ago"))
+                           (_ (format "@6-months-ago +%s" tag)))))
+          (if elfeed-is-unread (concat filter-string " +unread") filter-string)))
+
+  (defun leo/elfeed-search-filter-ivy ()
+    "Set elfeed filter by ivy"
+    (interactive)
+    (ivy-read "Tag: "
+              (append '("Today" "All") (elfeed-db-get-all-tags))
+              :action (lambda (tag)
+                        (let* ((filter-string (leo/elfeed-construct-filter tag)))
+                          (elfeed-search-set-filter filter-string)))
+              :history 'leo/elfeed-search-filter-ivy-history
+              :require-match t
+              :preselect t
+              :caller 'leo/elfeed-search-filter-ivy
+              ))
+
+  (defun elfeed-tag-selection-as (mytag)
+    "Returns a function that tags an elfeed entry or selection as
+MYTAG"
+    (lambda ()
+      "Toggle a tag on an Elfeed search selection"
+      (interactive)
+      (elfeed-search-toggle-all mytag)))
+
+  (define-key elfeed-search-mode-map "l" (elfeed-tag-selection-as 'readlater))
+  (define-key elfeed-search-mode-map "d" (elfeed-tag-selection-as 'junk))
+  (define-key elfeed-search-mode-map "*" (elfeed-tag-selection-as 'star))
+
+
+  (with-eval-after-load 'mu4e-alert
+    ;; Enable Desktop notifications
+    (mu4e-alert-set-default-style 'notifier))
+  (prodigy-define-tag
+    :name 'email
+    :ready-message "Checking Email using IMAP IDLE. Ctrl-C to shutdown.")
+  (prodigy-define-service
+   :name "imapnotify-gmail"
+   :command "goimapnotify"
+   :args (list "-conf" (expand-file-name "goimapnotify/gmail.conf" (getenv "HOME")))
+   :tags '(email)
+   :kill-signal 'sigkill)
+
+  (prodigy-define-service
+    :name "imapnotify-outlook"
+    :command "imapnotify"
+    :args (list "-c" (expand-file-name "imapnotify/outlook.js" (getenv "HOME")))
+    :tags '(email)
+    :kill-signal 'sigkill)
+  (defun leo/start-prodigy ()
+    (prodigy-start-service  (prodigy-find-service "imapnotify-gmail"))
+    (prodigy-start-service  (prodigy-find-service "imapnotify-outlook")))
+  (run-with-timer 0 (* 300) 'leo/start-prodigy)
+  (leo/start-prodigy)
+
+  (defun fetch-access-token ()
+     (with-temp-buffer
+	     (call-process "/Users/fuyu0425/.asdf/shims/python" nil t nil "/Users/fuyu0425/bin/oauth2ms" "--encode-xoauth2")
+	(buffer-string)))
+
+   ;; Add new authentication method for xoauth2
+   (cl-defmethod smtpmail-try-auth-method
+     (process (_mech (eql xoauth2)) user password)
+     (let* ((access-token (fetch-access-token)))
+	(smtpmail-command-or-throw
+	 process
+	 (concat "AUTH XOAUTH2 " access-token)
+	 235)))
+
+   ;;; Register the method
+   ;; (with-eval-after-load 'smtpmail
+   ;;   (add-to-list 'smtpmail-auth-supported 'xoauth2))
+
+  (setq  smtpmail-queue-dir "~/.mail/queue/cur")
+  (setq mu4e-contexts
+    `( ,(make-mu4e-context
+    :name "gmail"
+    :enter-func (lambda () (mu4e-message "Switch to the Gmail context"))
+    ;; leave-func not defined
+    :match-func (lambda (msg)
+      (when msg
+        (mu4e-message-contact-field-matches msg
+          :to "a0919610611@gmail.com")))
+    :vars '((user-mail-address      . "a0919610611@gmail.com"  )
+            (user-full-name     . "Yu-Fu Fu" )
+            (mu4e-drafts-folder . "/gmail/[Gmail]/Drafts")
+            (mu4e-sent-folder . "/gmail/[Gmail]/Sent Mail")
+            (mu4e-trash-folder . "/gmail/[Gmail]/Trash")
+            (smtpmail-default-smtp-server . "smtp.gmail.com")
+            (smtpmail-smtp-user . nil)
+            (smtpmail-local-domain . "localhost")
+            (smtpmail-smtp-server . "smtp.gmail.com")
+            (smtpmail-smtp-service . 587)
+            (message-send-mail-function . async-smtpmail-send-it)
+            (send-mail-function . async-smtpmail-send-it)
+            (smtpmail-debug-info . t)
+            (smtpmail-debug-verb . t)
+            (starttls-use-gnutls . t)
+            (starttls-gnutls-program . "gnutls-cli")
+            (smtpmail-stream-type . starttls)
+            (smtpmail-auth-supported . (cram-md5 plain login))
+            (mu4e-compose-signature . "Best regards\nYu-Fu, Fu (傅裕夫)")
+            ))
+       ,(make-mu4e-context
+         :name "outlook"
+         :enter-func (lambda () (mu4e-message "Switch to the Gatech context"))
+         ;; leave-fun not defined
+         :match-func (lambda (msg)
+                       (when msg
+                         (mu4e-message-contact-field-matches msg :to "yufu@gatech.edu")))
+         :vars '((user-mail-address      . "yufu@gatech.edu")
+                 (user-full-name     . "Yu-Fu Fu")
+                 (smtpmail-smtp-user . "yfu330@gatech.edu")
+                 (smtpmail-local-domain . "gatech.edu")
+                 (mu4e-drafts-folder . "/gatech/Drafts")
+                 (mu4e-sent-folder . "/gatech/Sent Items")
+                 (mu4e-trash-folder . "/gatech/Deleted Items")
+                 (smtpmail-smtp-server . "smtp.office365.com")
+                 (smtpmail-smtp-service . 587)
+                 (smtpmail-stream-type . starttls)
+                 (message-send-mail-function . smtpmail-send-it)
+                 (send-mail-function . smtpmail-send-it)
+                 (smtpmail-auth-supported . (xoauth2))
+                 (mu4e-compose-signature . "Best regards\nYu-Fu, Fu")
+                 ))))
+  (setq mu4e-org-contacts-file  "~/org/contact.org")
+  (add-to-list 'mu4e-headers-actions
+               '("org-contact-add" . mu4e-action-add-org-contact) t)
+  (add-to-list 'mu4e-view-actions
+               '("org-contact-add" . mu4e-action-add-org-contact) t)
+  (setq leo/emacs-mode-list '(mu4e-headers-mode
+                         mu4e-view-mode
+                         eww-mode
+                         xwidget-webkit-mode
+                         elfeed-show-mode
+                         ))
+  (cl-loop for m in leo/emacs-mode-list
+           do (add-to-list 'evil-emacs-state-modes m)
+              (evil-set-initial-state m 'emacs))
+  (with-eval-after-load 'eww
+    (add-to-list 'evil-emacs-state-modes 'eww-mode)
+    (evil-set-initial-state 'eww-mode 'emacs))
+  (with-eval-after-load 'elfeed
+    (add-to-list 'evil-emacs-state-modes 'elfeed-show-mode)
+    (evil-set-initial-state 'elfeed-show-mode 'emacs))
+  (with-eval-after-load 'bufler
+    (add-to-list 'evil-emacs-state-modes 'bufler-list-mode)
+    (evil-set-initial-state 'bufler-list-mode 'emacs))
+
+  (setq mu4e-alert-interesting-mail-query
+        (concat
+         "flag:unread maildir:/gmail/INBOX "
+         "OR "
+         "flag:unread maildir:/gatech/INBOX "
+         "OR "
+         "flag:unread maildir:/gatech/CS6265 "
+         "OR "
+         "flag:unread maildir:/gatech/Piazza "
+         "AND NOT flag:trashed "
+         ))
+  (defun revert-mu4e-main-buffer ()
+    (mu4e-maildirs-extension-force-update)
+    (with-current-buffer " *mu4e-main*" (revert-buffer)))
+
+  (add-hook 'mu4e-index-updated-hook 'revert-mu4e-main-buffer)
+
+  (all-the-icons-ivy-rich-mode 1)
+  (ivy-rich-mode 1)
+  (all-the-icons-ibuffer-mode 1)
+  (setq ivy-posframe-height-alist '((swiper . 20)
+                                    (t      . 20)))
+  (setq ivy-posframe-width 100
+        ivy-posframe-height 20)
+  (setq ivy-posframe-parameters
+        '((left-fringe . 8)
+          (right-fringe . 8)))
+
+  (setq ivy-posframe-display-functions-alist
+        '((swiper          . ivy-display-function-fallback)
+          (org-ref-ivy-insert-ref-link          . ivy-display-function-fallback)
+          (org-ref-ivy-insert-cite-link          . ivy-display-function-fallback)
+          (complete-symbol . ivy-posframe-display-at-point)
+          (counsel-M-x     . ivy-posframe-display-at-window-center)
+          (t               . ivy-posframe-display)))
+  (ivy-posframe-mode 1)
+  (global-set-key (kbd "C-=") 'er/expand-region)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (spacemacs/set-leader-keys-for-major-mode
+    'elfeed-search-mode
+    "," 'leo/elfeed-search-filter-ivy
+    "f" 'leo/elfeed-search-filter-ivy
+    "t" 'leo/elfeed-toggle-unread)
+  ;; (company-posframe-mode 1)
+  (defalias 'dnd-unescape-uri 'dnd--unescape-uri)
+  (spacemacs/set-leader-keys-for-major-mode
+    'bibtex-mode
+    "lb" 'biblio-lookup)
+  (require 'org-roam-bibtex)
+  (add-hook 'org-roam-mode-hook #'org-roam-bibtex-mode)
+  (setq orb-templates
+        '(("r" "ref" plain #'org-roam-capture--get-point
+           ""
+           ;; (file "~/org/template/paper_note.org")
+           :file-name "paper_notes/${citekey}"
+           :head "#+TITLE: ${title}
+#+ROAM_KEY: ${citekey}
+${ref}
+
+* ${title}
+:PROPERTIES:
+:Custom_ID: ${citekey}
+:AUTHOR: ${author-or-editor-abbrev}
+:YEAR: ${year}
+:NOTER_DOCUMENT: ${file}
+:END:
+"
+           :unnarrowed t)))
 )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))
