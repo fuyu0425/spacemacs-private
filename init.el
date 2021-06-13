@@ -2,12 +2,6 @@
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
-(let*
-  ((last-args (car (cdr command-line-args))))
-  (if (equal "-persp-q" last-args)
-      (setq persp-auto-resume-time -1
-            persp-auto-save-opt 0)))
-
 (add-to-list 'default-frame-alist
              '(ns-transparent-titlebar . t))
 
@@ -131,30 +125,30 @@ This function should only modify configuration layer settings."
      ruby
      ;; tools
      gnus
-     (mu4e :variables
-           mu4e-use-maildirs-extension t
-           user-mail-address "a0919610611@gmail.com"
-           mu4e-installation-path "/usr/local/Cellar/mu/1.4.15/share/emacs/site-lisp"
-           mu4e-maildir "~/.mail"
-           mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
-           mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-           mu4e-trash-folder "/gmail/[Gmail]/Trash"
-           mu4e-change-filenames-when-moving t
-           mu4e-get-mail-command "mbsync -a"
-           mu4e-update-interval 900
-           mu4e-maildir-shortcuts '(("/gmail/INBOX" . ?g))
-           mu4e-bookmarks
-                 `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
-                   ("date:today..now" "Today's messages" ?t)
-                   ("date:7d..now" "Last 7 days" ?w)
-                   ("mime:image/*" "Messages with images" ?p)
-                   (,(mapconcat 'identity
-                                (mapcar
-                                 (lambda (maildir)
-                                   (concat "maildir:" (car maildir)))
-                                 mu4e-maildir-shortcuts) " OR ")
-                    "All inboxes" ?i))
-           )
+     ;; (mu4e :variables
+     ;;       mu4e-use-maildirs-extension t
+     ;;       user-mail-address "a0919610611@gmail.com"
+     ;;       mu4e-installation-path "/usr/local/Cellar/mu/1.4.15/share/emacs/site-lisp"
+     ;;       mu4e-maildir "~/.mail"
+     ;;       mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+     ;;       mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+     ;;       mu4e-trash-folder "/gmail/[Gmail]/Trash"
+     ;;       mu4e-change-filenames-when-moving t
+     ;;       mu4e-get-mail-command "mbsync -a"
+     ;;       mu4e-update-interval 900
+     ;;       mu4e-maildir-shortcuts '(("/gmail/INBOX" . ?g))
+     ;;       mu4e-bookmarks
+     ;;             `(("flag:unread AND NOT flag:trashed" "Unread messages" ?u)
+     ;;               ("date:today..now" "Today's messages" ?t)
+     ;;               ("date:7d..now" "Last 7 days" ?w)
+     ;;               ("mime:image/*" "Messages with images" ?p)
+     ;;               (,(mapconcat 'identity
+     ;;                            (mapcar
+     ;;                             (lambda (maildir)
+     ;;                               (concat "maildir:" (car maildir)))
+     ;;                             mu4e-maildir-shortcuts) " OR ")
+     ;;                "All inboxes" ?i))
+     ;;       )
      pandoc
      helpful
      (cmake
@@ -371,11 +365,13 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-colorize-cursor-according-to-state t
 
    ;; Default font or prioritized list of fonts.
-   dotspacemacs-default-font '("Monaco"
-                               :size 14.0
-                               :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
+   dotspacemacs-default-font '(
+                               "Monaco"
+                                  ; "Source Code Pro"
+                                  :size 13.0
+                                  :weight normal
+                                  :width normal
+                                  :powerline-scale 1.1)
 
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
@@ -565,7 +561,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil, advise quit functions to keep server open when quitting.
    ;; (default nil)
-   dotspacemacs-persistent-server nil
+   dotspacemacs-persistent-server t
 
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
@@ -602,6 +598,19 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
 
+    ;; If non nil activate `clean-aindent-mode' which tries to correct
+    ;; virtual indentation of simple modes. This can interfer with mode specific
+    ;; indent handling like has been reported for `go-mode'.
+    ;; If it does deactivate it here.
+    ;; (default t)
+   dotspacemacs-use-clean-aindent-mode t
+
+;; If non-nil shift your number row to match the entered keyboard layout
+;; (only in insert state). Currently supported keyboard layouts are:
+;; `qwerty-us', `qwertz-de' and `querty-ca-fr'.
+;; New layouts can be added in `spacemacs-editing' layer.
+;; (default nil)
+   dotspacemacs-swap-number-row nil
    ;; Either nil or a number of seconds. If non-nil zone out after the specified
    ;; number of seconds. (default nil)
    dotspacemacs-zone-out-when-idle nil
@@ -609,7 +618,18 @@ It should only modify the values of Spacemacs settings."
    ;; Run `spacemacs/prettify-org-buffer' when
    ;; visiting README.org files of Spacemacs.
    ;; (default nil)
-   dotspacemacs-pretty-docs nil))
+   dotspacemacs-pretty-docs t
+    ;; If nil the home buffer shows the full path of agenda items
+    ;; and todos. If non nil only the file name is shown.
+   dotspacemacs-home-shorten-agenda-source nil
+
+    ;; If non-nil then byte-compile some of Spacemacs files.
+   dotspacemacs-byte-compile t)
+    (let*
+        ((last-args (car (cdr command-line-args))))
+        (if (equal "-persp-q" last-args)
+            (setq dotspacemacs-auto-resume-layouts nil
+                ))))
 
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
@@ -625,14 +645,31 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+    (let*
+        ((last-args (car (cdr command-line-args))))
+        (if (equal "-persp-q" last-args)
+            (setq persp-auto-resume-time -1
+                persp-auto-save-opt 0)))
+   (spacemacs|do-after-display-system-init
+       (spacemacs/set-default-font dotspacemacs-default-font))
   (setq monokai-highlight      "#535246"
         monokai-highlight-line "#353630")
 
   (setq evil-want-abbrev-expand-on-insert-exit nil)
   (setq-default git-magit-status-fullscreen t)
+  ;; disable suspend-frame
+  (put 'suspend-frame 'disabled t)
+  (global-unset-key (kbd "C-z"))
   (setq winum-scope 'frame-local)
+
   ;; (setq helm-follow-mode-persistent t)
   )
+
+(defun spacemacs/prompt-kill-frame ()
+    "Prompt to save changed buffers and kill frames"
+    (interactive)
+    (save-some-buffers nil t)
+    (delete-frame))
 
 
 (defun my-reset-frame-size (&optional frame)
@@ -716,15 +753,25 @@ dump."
   )
 
 (defun leo/configure-evil ()
-  (when (not (display-graphic-p))
-    (setq evil-toggle-key "C-`"))
   (setq-default
    evil-want-Y-yank-to-eol nil
    evil-ex-visual-char-range t
    evil-escape-key-sequence "jk"
    evil-escape-unordered-key-sequence "true"
    evil-escape-delay 0.2)
-  (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop))
+  (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop)
+    ;; configure toggle-key
+    (with-no-warnings
+        (dolist (pair '((evil-motion-state-map evil-emacs-state)
+                           (evil-insert-state-map evil-emacs-state)
+                           (evil-emacs-state-map evil-exit-emacs-state)))
+            (when (boundp (car pair))
+                (let ((map (symbol-value (car pair)))
+                         (fun (cadr pair)))
+                    (when (keymapp map)
+                        (define-key map (kbd "C-z") fun)
+                        (define-key map (kbd "M-z") fun))))))
+    )
 
 (defun leo/configure-persp ()
   (setq layouts-enable-autosave t
@@ -759,8 +806,8 @@ before packages are loaded."
   ;; (exec-path-from-shell-initialize)
   ;; (exec-path-from-shell-copy-env "SSH_AGENT_PID")
   ;; (exec-path-from-shell-copy-env "SSH_AUTH_SOCK")
-  (my-reset-frame-size)
-  (add-hook 'after-make-frame-functions 'my-reset-frame-size t)
+  ;; (my-reset-frame-size)
+  ;; (add-hook 'after-make-frame-functions 'my-reset-frame-size t)
   (defvaralias 'helm-c-yas-space-match-any-greedy 'helm-yas-space-match-any-greedy "Temporary alias for Emacs27")
   (setq auto-save-interval 60)
   (setq tags-add-tables nil)
@@ -929,30 +976,30 @@ before packages are loaded."
   (spacemacs/set-leader-keys
     "atl" 'lsp)
   ;; (define-key mu4e-headers-mode-map (kbd "R"))
-  (use-package mu4e-views
-  :after mu4e
-  :defer nil
-  :bind (:map mu4e-headers-mode-map
-	    ("v" . mu4e-views-mu4e-select-view-msg-method) ;; select viewing method
-	    ("M-n" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
-	    ("M-p" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
-        ("f" . mu4e-views-toggle-auto-view-selected-message) ;; toggle opening messages automatically when moving in the headers view
-        ("i" . mu4e-views-mu4e-view-as-nonblocked-html) ;; show currently selected email with all remote content
-	    )
-  :config
-  (setq mu4e-views-completion-method 'helm) ;; use ivy for completion
-  (setq mu4e-views-default-view-method "html") ;; make xwidgets default
-  (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
-  (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window) ;; when pressing n and p stay in the current window
-  (setq mu4e-views-auto-view-selected-message nil)) ;; automatically open messages when moving in the headers view
-  ;; (explain-pause-mode 1)
-  (defun mu4e-views-mu4e-view-in-browser ()
-    "Wraps the `mu4e-view-action' function.
-Passes on the message stored in `mu4e-views--current-mu4e-message'."
-    (interactive)
-    (mu4e-action-view-in-browser mu4e-views--current-mu4e-message))
-  (define-key mu4e-views-view-actions-mode-map (kbd "v") 'mu4e-views-mu4e-view-in-browser)
-  (define-key mu4e-headers-mode-map (kbd "v") 'mu4e-action-view-in-browser)
+;;   (use-package mu4e-views
+;;   :after mu4e
+;;   :defer nil
+;;   :bind (:map mu4e-headers-mode-map
+;; 	    ("v" . mu4e-views-mu4e-select-view-msg-method) ;; select viewing method
+;; 	    ("M-n" . mu4e-views-cursor-msg-view-window-down) ;; from headers window scroll the email view
+;; 	    ("M-p" . mu4e-views-cursor-msg-view-window-up) ;; from headers window scroll the email view
+;;         ("f" . mu4e-views-toggle-auto-view-selected-message) ;; toggle opening messages automatically when moving in the headers view
+;;         ("i" . mu4e-views-mu4e-view-as-nonblocked-html) ;; show currently selected email with all remote content
+;; 	    )
+;;   :config
+;;   (setq mu4e-views-completion-method 'helm) ;; use ivy for completion
+;;   (setq mu4e-views-default-view-method "html") ;; make xwidgets default
+;;   (mu4e-views-mu4e-use-view-msg-method "html") ;; select the default
+;;   (setq mu4e-views-next-previous-message-behaviour 'stick-to-current-window) ;; when pressing n and p stay in the current window
+;;   (setq mu4e-views-auto-view-selected-message nil)) ;; automatically open messages when moving in the headers view
+;;   ;; (explain-pause-mode 1)
+;;   (defun mu4e-views-mu4e-view-in-browser ()
+;;     "Wraps the `mu4e-view-action' function.
+;; Passes on the message stored in `mu4e-views--current-mu4e-message'."
+;;     (interactive)
+;;     (mu4e-action-view-in-browser mu4e-views--current-mu4e-message))
+;;   (define-key mu4e-views-view-actions-mode-map (kbd "v") 'mu4e-views-mu4e-view-in-browser)
+;;   (define-key mu4e-headers-mode-map (kbd "v") 'mu4e-action-view-in-browser)
   (setq gnus-keep-backlog t
         gnus-asynchronous t
         gnus-use-cache  t
@@ -963,6 +1010,13 @@ Passes on the message stored in `mu4e-views--current-mu4e-message'."
   (remove-hook 'gnus-mark-article-hook
                'gnus-summary-mark-read-and-unread-as-read)
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+    (setq xclip-method 'xsel)
+    (xclip-mode 1)
+    (spacemacs/set-leader-keys
+        "qq" 'spacemacs/prompt-kill-frame
+        "qQ" 'spacemacs/prompt-kill-emacs)
+    ;; for GUI mode in Linux
+    (global-set-key (kbd "C-S-v") 'yank)
 
 )
 
