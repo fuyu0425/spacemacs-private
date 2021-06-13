@@ -86,16 +86,20 @@ parameters."
   :group 'magit-autofetch
   :type 'hook)
 
+(defun magit-autofetch-log (msg)
+  (let* ((buffer (get-buffer-create "*magit-autofech-log*")))
+    (with-current-buffer buffer (insert msg))))
 
 (defun magit-autofetch-run ()
   "Fetch all repositories and notify user."
+  (interactive)
   (if magit-autofetch-ping-host
       (make-process :name "magit-autofetch-ping"
-                    :buffer "*magit-autofetch-ping"
-                    :command `("ping" "-c" "1" "-W" "3" ,magit-autofetch-ping-host)
+                    :buffer "*magit-autofetch-ping*"
+                    :command `("ping" "-c" "8" "-W" "3" ,magit-autofetch-ping-host)
                     :sentinel 'magit-autofetch--ping-sentinel
-                    :noquery t))
-      (magit-autofetch--work))
+                    :noquery t)
+      (magit-autofetch--work)))
 
 (defun magit-autofetch--ping-sentinel (process event)
   "Sentinel function for PROCESS to check ping success given EVENT."
@@ -129,7 +133,7 @@ parameters."
     (when (and (file-directory-p ".git")
                (car (ignore-errors
                       (process-lines "git" "config" "--get" "remote.origin.url"))))
-      (let* ((buffer (generate-new-buffer " *git-fetch"))
+      (let* ((buffer (generate-new-buffer " *git-fetch*"))
              (process
               (apply #'start-process "git-fetch" buffer "git" "fetch" magit-autofetch-fetch-args)))
         ;; (print (format "%s" project))
@@ -144,6 +148,7 @@ parameters."
   (unless (null project-list)
     (let ((project (car project-list)))
       (setq project-list (cdr project-list))
+      (magit-autofetch-log (format "fetch %s\n" project))
       (magit-autofetch--work-project project))))
 
 (defun magit-autofetch-sentinel (process _)
