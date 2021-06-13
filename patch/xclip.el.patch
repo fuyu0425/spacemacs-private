@@ -1,0 +1,9 @@
+--- xclip.el	2021-05-28 00:59:00.164759590 -0400
++++ xclip.el.patched	2021-05-28 01:01:09.726342539 -0400
+@@ -262,6 +262,7 @@
+                                                &context (window-system nil))
+         (if (not xclip-mode)
+             (cl-call-next-method)
++          (xclip-set-selection 'primary value)
+           (xclip-set-selection selection-symbol value)
+           nil))
