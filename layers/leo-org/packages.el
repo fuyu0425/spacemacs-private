@@ -20,7 +20,7 @@
     "iP"  'leo/org-insert-clipboard)
   (add-hook 'org-mode-hook #'flyspell-mode)
   (add-hook 'org-mode-hook (lambda () (setq-local org-download-image-dir
-                                                  (concat (file-name-sans-extension (buffer-name))
+                                                  (concat "images/" (file-name-sans-extension (buffer-name))
                                                           "_images"))))
   (setq org-enforce-todo-dependencies t
         org-enforce-todo-checkbox-dependencies t)
