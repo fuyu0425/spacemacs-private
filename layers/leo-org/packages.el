@@ -19,7 +19,8 @@
   (spacemacs/set-leader-keys-for-major-mode 'org-mode
     "iP"  'leo/org-insert-clipboard)
   (add-hook 'org-mode-hook #'flyspell-mode)
-  (add-hook 'org-mode-hook (lambda () (setq-local org-download-image-dir
+  (add-hook 'org-mode-hook (lambda () (setq-local org-download-heading-lvl nil
+                                                  org-download-image-dir
                                                   (concat "images/" (file-name-sans-extension (buffer-name))
                                                           "_images"))))
   (setq org-enforce-todo-dependencies t
