@@ -220,6 +220,13 @@ This function should only modify configuration layer settings."
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
+                                      ; (pdf-continuous-scroll-mode
+                                          ; :location (recipe
+                                                        ; :fetcher github
+                                                        ; :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
+                                      epc
+                                      ctable
+                                      deferred
                                       company-posframe
                                       ivy-posframe
                                       all-the-icons-ibuffer
@@ -688,6 +695,7 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+    (setq org-roam-db-update-idle-seconds 60)
     (let*
         ((last-args (car (cdr command-line-args))))
         (if (equal "-persp-q" last-args)
@@ -1396,6 +1404,7 @@ MYTAG"
     "lb" 'biblio-lookup)
   (require 'org-roam-bibtex)
   (add-hook 'org-roam-mode-hook #'org-roam-bibtex-mode)
+  (org-roam-bibtex-mode 1)
   (setq orb-templates
         '(("r" "ref" plain #'org-roam-capture--get-point
            ""
@@ -1409,9 +1418,16 @@ ${ref}
 :PROPERTIES:
 :Custom_ID: ${citekey}
 :AUTHOR: ${author-or-editor-abbrev}
-:YEAR: ${year}
 :NOTER_DOCUMENT: ${file}
 :END:
+
+** TODO Summary
+
+** TODO Novelty
+
+** TODO Questions
+
+** TODO Reference
 "
            :unnarrowed t)))
   (when (eq system-type 'gnu/linux)
@@ -1422,6 +1438,18 @@ ${ref}
       "qQ" 'spacemacs/prompt-kill-emacs)
     ;; for GUI mode in Linux
     (global-set-key (kbd "C-S-v") 'yank))
+    (with-eval-after-load 'pdf-tools
+        (evil-set-initial-state 'pdf-view-mode 'emacs)
+        (add-hook 'pdf-view-mode-hook
+            (lambda ()
+                (set (make-local-variable 'evil-emacs-state-cursor) (list nil))))
+        )
+    (setq bibtex-autokey-year-title-separator "_")
+    (require 'pdf-continuous-scroll-mode)
+    ;; (add-hook 'pdf-view-mode-hook 'pdf-continuous-scroll-mode)
+    (define-key pdf-view-mode-map (kbd "h") 'pdf-annot-add-highlight-markup-annotation)
+    ;; (add-to-list 'load-path "~/source/emacs-application-framework/")
+    ;; (require 'eaf)
 )
 
 (setq custom-file (expand-file-name "custom.el" dotspacemacs-directory))
